@@ -1,0 +1,10 @@
+port: "8000"
+host: "localhost"
+
+db:
+  username: "track"
+  # password: "jFXmrOm5VE0eSl5xFpo9BKJRcN1zZkj9"
+  host: "dpg-crhk8g3v2p9s73bc36c0-a.oregon-postgres.render.com"
+  port: "5432"
+  dbname: "track_vk5b"
+  sslmode: "require"
