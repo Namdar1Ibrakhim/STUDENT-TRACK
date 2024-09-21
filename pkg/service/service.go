@@ -2,12 +2,13 @@ package service
 
 import (
 	track "github.com/Namdar1Ibrakhim/student-track-system"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 )
 
 //Все сервисные интерфейсы пишем здесь
 type Authorization interface {
-	CreateUser(user track.User) (int, error)
+	CreateUser(user track.User, role constants.Role) (int, error)
 	GenerateToken(username, password string) (string, error)
                    //то что принимаем      //то что возвращаем
 	ParseToken(token string) (int, error)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,11 +16,11 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
-func (r *AuthPostgres) CreateUser(user track.User) (int, error) {
+func (r *AuthPostgres) CreateUser(user track.User, role constants.Role) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (firstname, lastname, username, password_hash) values ($1, $2, $3, $4) RETURNING id", usersTable)
+	query := fmt.Sprintf("INSERT INTO %s (firstname, lastname, username, password_hash, role) values ($1, $2, $3, $4, $5) RETURNING id", usersTable)
 
-	row := r.db.QueryRow(query, user.Firstname, user.Lastname, user.Username, user.Password)
+	row := r.db.QueryRow(query, user.Firstname, user.Lastname, user.Username, user.Password, role)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}

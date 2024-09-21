@@ -19,13 +19,23 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	authUser := router.Group("/auth")
 	{
-		authUser.POST("/sign-up", h.signUp)
-		authUser.POST("/sign-in", h.signIn)
+		authUser.POST("/sign-up", h.signUpStudent) 
+		authUser.POST("/sign-in", h.signIn) // один метод для всех полей
+		authUser.GET("/get", h.getUser)
+		//authUser.PUT("/update", h.updateUser)
+		//authUser.DELETE("/delete", h.updateUser)
 	}
 
-	api := router.Group("/api", h.userIdentity)
+	instructorRoutes := router.Group("/instrucor")
 	{
-		api.GET("/getInfo", h.getUser)
+		instructorRoutes.POST("/sign-up", h.signUpInstrucor)
+		instructorRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
+	}
+
+	adminRoutes := router.Group("/admin")
+	{
+		adminRoutes.POST("/sign-up", h.signUpAdmin)
+		adminRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
 	}
 
 	return router

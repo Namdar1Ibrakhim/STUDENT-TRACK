@@ -7,6 +7,7 @@ import (
 	"time"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -33,10 +34,10 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 
 //
 
-func (s *AuthService) CreateUser(user track.User) (int, error) {
+func (s *AuthService) CreateUser(user track.User, role constants.Role) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 
-	return s.repo.CreateUser(user)
+	return s.repo.CreateUser(user, role)
 }
 
 func generatePasswordHash(password string) string {
