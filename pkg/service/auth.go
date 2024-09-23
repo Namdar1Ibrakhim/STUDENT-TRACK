@@ -8,6 +8,7 @@ import (
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -83,4 +84,12 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 
 	return claims.UserId, nil
 
+}
+
+func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
+	user, error := s.repo.FindByID(userId)
+	if error != nil {
+		return dto.UserResponse{}, error
+	}
+	return user, nil
 }

@@ -2,9 +2,11 @@ package repository
 
 import (
 	"fmt"
+	"log"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -33,5 +35,13 @@ func (r *AuthPostgres) GetUser(username, password string) (track.User, error) {
 	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
 	err := r.db.Get(&user, query, username, password)
 
+	return user, err
+}
+
+func (r *AuthPostgres) FindByID(userId int) (dto.UserResponse, error) {
+	var user dto.UserResponse
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", usersTable)
+	err := r.db.Get(&user, query, userId)
+	log.Default()
 	return user, err
 }
