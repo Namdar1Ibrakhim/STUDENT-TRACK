@@ -17,25 +17,26 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	authUser := router.Group("/auth")
+	auth := router.Group("/auth")
 	{
-		authUser.POST("/sign-up", h.signUpStudent) 
-		authUser.POST("/sign-in", h.signIn) // один метод для всех полей
-		authUser.GET("/get", h.getUser)
+		authStudent := auth.Group("/student")
+		{
+			authStudent.POST("/sign-up", h.signUpStudent)
+			authStudent.POST("/sign-in", h.signIn) // один метод для всех полей
+		}
+		authInstructor := auth.Group("/instructor")
+		{
+			authInstructor.POST("/sign-up", h.signUpInstructor)
+			authInstructor.POST("/sign-in", h.signIn) // один метод для всех полей
+		}
+		authAdmin := auth.Group("/admin")
+		{
+			authAdmin.POST("/sign-up", h.signUpAdmin)
+			authAdmin.POST("/sign-in", h.signIn) // один метод для всех полей
+		}
+		auth.GET("/get", h.getUser)
 		//authUser.PUT("/update", h.updateUser)
 		//authUser.DELETE("/delete", h.updateUser)
-	}
-
-	instructorRoutes := router.Group("/instrucor")
-	{
-		instructorRoutes.POST("/sign-up", h.signUpInstrucor)
-		instructorRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
-	}
-
-	adminRoutes := router.Group("/admin")
-	{
-		adminRoutes.POST("/sign-up", h.signUpAdmin)
-		adminRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
 	}
 
 	return router
