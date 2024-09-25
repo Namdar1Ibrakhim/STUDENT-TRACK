@@ -14,6 +14,7 @@ type Authorization interface {
 	//то что принимаем      //то что возвращаем
 	ParseToken(token string) (int, error)
 	GetUser(userId int) (dto.UserResponse, error)
+	
 }
 
 type Service struct {

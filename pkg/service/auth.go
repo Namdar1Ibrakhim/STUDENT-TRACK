@@ -91,5 +91,8 @@ func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
 	if error != nil {
 		return dto.UserResponse{}, error
 	}
+	
 	return user, nil
 }
+
+

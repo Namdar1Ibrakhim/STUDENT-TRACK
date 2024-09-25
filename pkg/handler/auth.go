@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
@@ -112,6 +113,48 @@ func (h *Handler) getUser(c *gin.Context) {
 	}
 
 	user, err := h.services.GetUser(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusNotFound, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"user": user,
+	})
+}
+
+func (h *Handler) getStudentById(c *gin.Context) {
+
+	userId := c.Param("id")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid student ID")
+		return
+	}
+	user, err := h.services.GetUser(id)
+	if err != nil {
+		newErrorResponse(c, http.StatusNotFound, err.Error())
+		return
+	}
+	if user.Role != constants.RoleStudent {
+		newErrorResponse(c, http.StatusUnauthorized, "Student not found with this id")
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"user": user,
+	})
+}
+
+func (h *Handler) getUserById(c *gin.Context) {
+
+	userId := c.Param("id")
+	id, err := strconv.Atoi(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid student ID")
+		return
+	}
+	user, err := h.services.GetUser(id)
 	if err != nil {
 		newErrorResponse(c, http.StatusNotFound, err.Error())
 		return
