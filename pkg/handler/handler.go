@@ -49,6 +49,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	profile := router.Group("/profile", h.userIdentity)
 	{
 		profile.PUT("/users/:id", h.UpdateUser)
+		profile.DELETE("/users/:id", h.DeleteUser) //удаление акк через админ и юзер
 	}
 
 	return router

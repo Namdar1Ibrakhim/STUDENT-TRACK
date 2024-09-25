@@ -230,3 +230,62 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		"message": "Profile updated",
 	})
 }
+
+func (h *Handler) DeleteUser(c *gin.Context) {
+	idParam := c.Param("id")
+	userIdFromPath, err := strconv.Atoi(idParam)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	userIdFromToken, exists := c.Get(userCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		return
+	}
+
+	userIdFromTokenInt, ok := userIdFromToken.(int)
+	if !ok {
+		newErrorResponse(c, http.StatusInternalServerError, "Invalid user id type")
+		return
+	}
+
+	if userIdFromTokenInt != userIdFromPath {
+		h.checkRole(c, constants.RoleAdmin)
+		if c.IsAborted() {
+			return
+		}
+
+		existingUser, err := h.services.GetUser(userIdFromPath)
+		if err != nil {
+			newErrorResponse(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		if err := h.services.DeleteUser(existingUser.Id); err != nil {
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "User deleted by admin",
+		})
+		return
+	}
+
+	existingUser, err := h.services.GetUser(userIdFromTokenInt)
+	if err != nil {
+		newErrorResponse(c, http.StatusNotFound, "user not found")
+		return
+	}
+
+	if err := h.services.DeleteUser(existingUser.Id); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Account deleted",
+	})
+}

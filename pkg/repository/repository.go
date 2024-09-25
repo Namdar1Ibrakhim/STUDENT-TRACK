@@ -13,6 +13,7 @@ type Authorization interface {
 	GetUser(username, password string) (track.User, error)
 	FindByID(userId int) (dto.UserResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
+	DeleteUser(userId int) error
 }
 
 type Repository struct {

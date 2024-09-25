@@ -98,3 +98,7 @@ func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
 func (s *AuthService) UpdateUser(userId int, input dto.UpdateUser) error {
 	return s.repo.UpdateUser(userId, input)
 }
+
+func (s *AuthService) DeleteUser(userId int) error {
+	return s.repo.DeleteUser(userId)
+}

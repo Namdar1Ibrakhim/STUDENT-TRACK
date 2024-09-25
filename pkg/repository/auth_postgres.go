@@ -51,3 +51,9 @@ func (r *AuthPostgres) UpdateUser(userId int, input dto.UpdateUser) error {
 	_, err := r.db.Exec(query, input.Firstname, input.Lastname, input.Username, userId)
 	return err
 }
+
+func (r *AuthPostgres) DeleteUser(userId int) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1", usersTable)
+	_, err := r.db.Exec(query, userId)
+	return err
+}
