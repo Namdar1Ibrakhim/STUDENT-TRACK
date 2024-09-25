@@ -30,7 +30,7 @@ func (h *Handler) signUpStudent(c *gin.Context) {
 }
 
 // SIGN UP FOR INSTRUCTOR
-func (h *Handler) signUpInstrucor(c *gin.Context) {
+func (h *Handler) signUpInstructor(c *gin.Context) {
 	var input track.User
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
