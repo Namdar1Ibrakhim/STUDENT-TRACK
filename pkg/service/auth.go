@@ -91,8 +91,10 @@ func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
 	if error != nil {
 		return dto.UserResponse{}, error
 	}
-	
+
 	return user, nil
 }
 
-
+func (s *AuthService) UpdateUser(userId int, input dto.UpdateUser) error {
+	return s.repo.UpdateUser(userId, input)
+}

@@ -45,3 +45,9 @@ func (r *AuthPostgres) FindByID(userId int) (dto.UserResponse, error) {
 	log.Default()
 	return user, err
 }
+
+func (r *AuthPostgres) UpdateUser(userId int, input dto.UpdateUser) error {
+	query := fmt.Sprintf("UPDATE %s SET firstname=$1, lastname=$2, username=$3 WHERE id=$4", usersTable)
+	_, err := r.db.Exec(query, input.Firstname, input.Lastname, input.Username, userId)
+	return err
+}

@@ -24,7 +24,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			authStudent.POST("/sign-up", h.signUpStudent)
 			authStudent.POST("/sign-in", h.signIn) // один метод для всех полей
 			//authUser.PUT("/update", h.updateUser)
-			
+
 			//authUser.DELETE("/delete", h.updateUser)
 		}
 		instructorRoutes := router.Group("/instructor")
@@ -43,6 +43,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		}
 
+	}
+
+	// Пример изменения профиля юзеров по ID и проверяет доступ на админа
+	profile := router.Group("/profile", h.userIdentity)
+	{
+		profile.PUT("/users/:id", h.UpdateUser)
 	}
 
 	return router

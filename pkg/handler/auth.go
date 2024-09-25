@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"net/http"
 	"strconv"
 	"strings"
@@ -162,5 +163,70 @@ func (h *Handler) getUserById(c *gin.Context) {
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"user": user,
+	})
+}
+
+func (h *Handler) UpdateUser(c *gin.Context) {
+	idParam := c.Param("id")
+	userIdFromPath, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	userIdFromToken, exists := c.Get(userCtx)
+	if !exists {
+		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		return
+	}
+
+	userIdFromTokenInt, ok := userIdFromToken.(int)
+	if !ok {
+		newErrorResponse(c, http.StatusInternalServerError, "Invalid user id type")
+		return
+	}
+
+	var input dto.UpdateUser
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid input data")
+	}
+
+	if userIdFromTokenInt != userIdFromPath {
+		h.checkRole(c, constants.RoleAdmin) //checking permisson
+		if c.IsAborted() {
+			return
+		}
+
+		existingUser, err := h.services.GetUser(userIdFromPath)
+
+		if err != nil {
+			newErrorResponse(c, http.StatusNotFound, "User not found")
+			return
+		}
+		if err := h.services.UpdateUser(existingUser.Id, input); err != nil {
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "User updated by admin",
+		})
+
+		return
+	}
+
+	existingUser, err := h.services.GetUser(userIdFromTokenInt)
+	if err != nil {
+		newErrorResponse(c, http.StatusNotFound, "User not found")
+		return
+	}
+
+	if err := h.services.UpdateUser(existingUser.Id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Profile updated",
 	})
 }

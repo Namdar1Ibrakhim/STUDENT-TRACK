@@ -7,11 +7,12 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-//Все репозиторные интерфейсы пишем здесь
+// Все репозиторные интерфейсы пишем здесь
 type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
 	GetUser(username, password string) (track.User, error)
-	FindByID(userId int)(dto.UserResponse, error)
+	FindByID(userId int) (dto.UserResponse, error)
+	UpdateUser(userId int, input dto.UpdateUser) error
 }
 
 type Repository struct {
