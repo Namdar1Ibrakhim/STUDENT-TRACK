@@ -15,9 +15,7 @@ func NewHandler(services *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
-	router := gin.New()
-
-	auth := router.Group("/auth")
+	rout	auth := router.Group("/auth")
 	{
 		authStudent := auth.Group("/student")
 		{
@@ -39,16 +37,29 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		//authUser.DELETE("/delete", h.updateUser)
 	}
 
-	instructorRoutes := router.Group("/instrucor")
+<<<<<<< HEAD
+	instructorRoutes := router.Group("/instructor")
 	{
 		instructorRoutes.POST("/sign-up", h.signUpInstrucor)
 		instructorRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
+		instructorRoutes.GET("/student/:id", h.getStudentById) // один метод для всех полей
+
 	}
 
 	adminRoutes := router.Group("/admin")
 	{
 		adminRoutes.POST("/sign-up", h.signUpAdmin)
 		adminRoutes.POST("/sign-in", h.signIn) // один метод для всех полей
+		adminRoutes.GET("/user/:id", h.getUserById)
+		
+
+	}
+
+=======
+>>>>>>> bd88000fb7bc59bca576ee76a0a0de4ebfcf3a03
+GET("/user/:id", h.getUserById)
+		
+
 	}
 
 	return router
