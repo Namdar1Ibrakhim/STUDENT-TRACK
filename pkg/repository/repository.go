@@ -14,6 +14,7 @@ type Authorization interface {
 	FindByID(userId int) (dto.UserResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error
+	EditPassword(userId int, password string) error
 }
 
 type Repository struct {

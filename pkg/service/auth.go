@@ -102,3 +102,9 @@ func (s *AuthService) UpdateUser(userId int, input dto.UpdateUser) error {
 func (s *AuthService) DeleteUser(userId int) error {
 	return s.repo.DeleteUser(userId)
 }
+
+func (s *AuthService) EditPassword(userId int, password string) error {
+	password = generatePasswordHash(password)
+	return s.repo.EditPassword(userId, password)
+}
+

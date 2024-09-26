@@ -16,6 +16,7 @@ type Authorization interface {
 	GetUser(userId int) (dto.UserResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error
+	EditPassword(userId int, password string) error
 }
 
 type Service struct {

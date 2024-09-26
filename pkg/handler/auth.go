@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
@@ -287,5 +288,57 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Account deleted",
+	})
+}
+
+func (h *Handler) editPasswordByCurrentUserId(c *gin.Context) {
+	passwordParam := c.Param("password")
+
+	header := c.GetHeader(authorizationHeader)
+	if header == "" {
+		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
+		return
+	}
+
+	headerParts := strings.Split(header, " ")
+
+	if len(headerParts) != 2 {
+		newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
+		return
+	}
+
+	userId, err := h.services.Authorization.ParseToken(headerParts[1])
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	if err := h.services.EditPassword(userId, passwordParam); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Password Updated",
+	})
+}
+
+func (h *Handler) editPasswordByUserId(c *gin.Context) {
+	idParam := c.Param("id")
+	passwordParam := c.Param("password")
+
+	userId, err := strconv.Atoi(idParam)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	if err := h.services.EditPassword(userId, passwordParam); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Password Updated",
 	})
 }
