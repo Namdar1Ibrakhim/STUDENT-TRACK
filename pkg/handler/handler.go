@@ -37,7 +37,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			adminRoutes.POST("/sign-up", h.signUpAdmin)
 			adminRoutes.POST("/sign-in", h.signIn)      // один метод для всех полей
 			adminRoutes.GET("/user/:id", h.getUserById) // получение пользователя по айди
-			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId)
+			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей 
 		}
 
 	}
