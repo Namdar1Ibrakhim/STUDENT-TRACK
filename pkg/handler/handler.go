@@ -35,9 +35,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		adminRoutes := router.Group("/admin")
 		{
 			adminRoutes.POST("/sign-up", h.signUpAdmin)
-			adminRoutes.POST("/sign-in", h.signIn)      // один метод для всех полей
-			adminRoutes.GET("/user/:id", h.getUserById) // получение пользователя по айди
-			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей 
+			adminRoutes.POST("/sign-in", h.signIn)                                 // один метод для всех полей
+			adminRoutes.GET("/user/:id", h.getUserById)                            // получение пользователя по айди
+			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей
 		}
 
 	}
@@ -49,6 +49,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		profile.DELETE("/users/:id", h.DeleteUser) //удаление акк через админ и юзер
 		profile.GET("/editPassword/:password", h.editPasswordByCurrentUserId)
 
+	}
+
+	main := router.Group("/main", h.userIdentity)
+	{
+		main.POST("/upload-csv", h.UploadCSV)
+		/////////////
+		//Example CSV file
+
+		//subjectName,Grade   --- Headers
+		//Math,90             |   data
+		//Physic,70           |
+		//Discrete math,83    |
 	}
 
 	return router
