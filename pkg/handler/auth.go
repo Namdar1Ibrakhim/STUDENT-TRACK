@@ -196,6 +196,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	if userIdFromTokenInt != userIdFromPath {
 		h.checkRole(c, constants.RoleAdmin) //checking permisson
 		if c.IsAborted() {
+			newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
 			return
 		}
 
@@ -255,6 +256,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	if userIdFromTokenInt != userIdFromPath {
 		h.checkRole(c, constants.RoleAdmin)
 		if c.IsAborted() {
+			newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
 			return
 		}
 

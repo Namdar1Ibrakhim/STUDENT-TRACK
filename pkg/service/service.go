@@ -22,6 +22,7 @@ type Authorization interface {
 
 type CSV interface {
 	ValidateCSV(file io.Reader) error
+	ProcessCSV(studentId int, file io.Reader) error
 }
 
 type Service struct {

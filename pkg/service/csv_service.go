@@ -59,6 +59,11 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 	return nil
 }
 
+func (s *CSVService) ProcessCSV(studentId int, file io.Reader) error {
+	//////....
+	return nil
+}
+
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {
 	if len(headers) != len(expectedHeaders) {
 		return false
