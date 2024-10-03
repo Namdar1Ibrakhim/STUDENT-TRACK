@@ -26,33 +26,45 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 		return errors.New("invalid CSV structure")
 	}
 
-	expectedHeaders := []string{"subjectname", "grade"}
+	expectedHeaders := []string{
+		"Operating System", "Analysis of Algorithm", "Programming Concept", "Software Engineering",
+		"Computer Network", "Applied Mathematics", "Computer Security", "Hackathons attended",
+		"Interest", "Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability"}
+
 	if len(records) == 0 || !s.equalHeaders(records[0], expectedHeaders) {
-		return errors.New("invalid CSV structure, expected columns: subjectName, Grade")
+		return errors.New("invalid CSV structure, expected columns: check the required format")
 	}
 
 	for i, row := range records[1:] {
-		if len(row) != 2 {
+		if len(row) != len(expectedHeaders) {
 			return fmt.Errorf("invalid number of columns at row %d", i+2)
 		}
 
-		subjectName := row[0]
-		gradeStr := row[1]
+		for j := 0; j < 6; j++ {
+			gradeStr := row[j]
+			if gradeStr == "" {
+				return fmt.Errorf("missing grade for subject at row %d, column %d", i+2, j+1)
+			}
 
-		if subjectName == "" {
-			return fmt.Errorf("missing subjectName at row %d", i+2)
-		}
-		if gradeStr == "" {
-			return fmt.Errorf("missing grade at row %d", i+2)
-		}
-
-		grade, err := strconv.Atoi(gradeStr)
-		if err != nil {
-			return fmt.Errorf("invalid grade value at row %d, must be a number", i+2)
+			grade, err := strconv.Atoi(gradeStr)
+			if err != nil || grade < 0 || grade > 100 {
+				return fmt.Errorf("invalid grade value at row %d, column %d, must be between 0 and 100", i+2, j+1)
+			}
 		}
 
-		if grade < 0 || grade > 100 {
-			return fmt.Errorf("invalid grade value at row %d, must be between 0 and 100", i+2)
+		hackathonsStr := row[7]
+		if hackathonsStr == "" {
+			return fmt.Errorf("missing value for 'hackathons' at row %d", i+2)
+		}
+		hackathons, err := strconv.Atoi(hackathonsStr)
+		if err != nil || hackathons < 0 {
+			return fmt.Errorf("invalid 'Hackathons attended' value at row %d, must be a non-negative integer", i+2)
+		}
+
+		for j := 8; j <= 14; j++ {
+			if row[j] == "" {
+				return fmt.Errorf("missing value for '%s' at row %d", expectedHeaders[j], i+2)
+			}
 		}
 	}
 
@@ -70,7 +82,7 @@ func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {
 	}
 
 	for i, header := range headers {
-		if strings.TrimSpace(strings.ToLower(header)) != expectedHeaders[i] {
+		if strings.TrimSpace(strings.ToLower(header)) != strings.TrimSpace(strings.ToLower(expectedHeaders[i])) {
 			return false
 		}
 	}

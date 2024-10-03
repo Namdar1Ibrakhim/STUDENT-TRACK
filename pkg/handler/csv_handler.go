@@ -28,7 +28,7 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	}
 
 	studentIdParam := c.Query("student_id")
-	if h.checkRole(c, constants.RoleInstructor) {
+	if h.checkRole(c, constants.RoleInstructor) || h.checkRole(c, constants.RoleAdmin) {
 		if studentIdParam == "" {
 			newErrorResponse(c, http.StatusInternalServerError, "missing student_id")
 			return
