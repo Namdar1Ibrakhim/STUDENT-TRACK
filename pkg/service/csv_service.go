@@ -29,7 +29,7 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 	expectedHeaders := []string{
 		"Operating System", "Analysis of Algorithm", "Programming Concept", "Software Engineering",
 		"Computer Network", "Applied Mathematics", "Computer Security", "Hackathons attended",
-		"Interest", "Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability"}
+		"Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability"}
 
 	if len(records) == 0 || !s.equalHeaders(records[0], expectedHeaders) {
 		return errors.New("invalid CSV structure, expected columns: check the required format")
@@ -40,7 +40,7 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 			return fmt.Errorf("invalid number of columns at row %d", i+2)
 		}
 
-		for j := 0; j < 6; j++ {
+		for j := 0; j <= 6; j++ {
 			gradeStr := row[j]
 			if gradeStr == "" {
 				return fmt.Errorf("missing grade for subject at row %d, column %d", i+2, j+1)
@@ -61,7 +61,7 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 			return fmt.Errorf("invalid 'Hackathons attended' value at row %d, must be a non-negative integer", i+2)
 		}
 
-		for j := 8; j <= 14; j++ {
+		for j := 8; j < 14; j++ {
 			if row[j] == "" {
 				return fmt.Errorf("missing value for '%s' at row %d", expectedHeaders[j], i+2)
 			}
