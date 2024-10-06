@@ -8,8 +8,8 @@ Installed libraries:
 * go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 Make migrations: 
-* For up:
-*  * migrate -path ./schema -database ${YOUR_DB} up
+* For up: * migrate -path ./schema -database ${YOUR_DB} up
+* For down: * migrate -path ./schema -database ${YOUR_DB} down
 
 How to run app:
 * go run cmd/main.go
