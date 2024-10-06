@@ -17,17 +17,19 @@ type Authorization interface {
 	EditPassword(userId int, password string) error
 }
 
-type CSV interface {
+type Predictions interface {
+	SavePrediction(userId int, predictions string) error
+	
 }
 
 type Repository struct {
 	Authorization
-	CSV
+	Predictions
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
-		CSV:           NewAuthPostgres(db),
+		Predictions:   NewPredictionsPostgres(db),
 	}
 }
