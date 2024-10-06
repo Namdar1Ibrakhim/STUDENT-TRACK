@@ -132,7 +132,7 @@ func (s *CSVService) ProcessCSV(studentId int, file io.Reader) error {
 		return fmt.Errorf("не удалось сохранить Предикшн студента: %v", err)
 	}
 	//////....
-	return "Prediction"
+	return nil
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {
