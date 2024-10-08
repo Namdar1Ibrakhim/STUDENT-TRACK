@@ -45,15 +45,16 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 			return
 		}
 
-		// вызов метода дальнейшей логики
-		err = h.services.ProcessCSV(studentId, src)
+		src.Seek(0, 0)
+		prediction, err := h.services.PredictCSV(studentId, src)
 		if err != nil {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "File successfully uploaded and validated by Instructor",
+			"message":    "File successfully uploaded and validated by Instructor",
+			"prediction": prediction,
 		})
 		return
 
@@ -70,15 +71,16 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 			return
 		}
 
-		// вызов метода дальнейшей логики
-		err = h.services.ProcessCSV(userIdFromToken.(int), src)
+		src.Seek(0, 0)
+		prediction, err := h.services.PredictCSV(userIdFromToken.(int), src)
 		if err != nil {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "File successfully uploaded and validated",
+			"message":    "File successfully uploaded and validated",
+			"prediction": prediction,
 		})
 		return
 	}
