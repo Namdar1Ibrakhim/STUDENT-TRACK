@@ -62,12 +62,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		//Physic,70           |
 		//Discrete math,83    |
 	}
-	
+
 	course := router.Group("/course", h.userIdentity)
 	{
 		course.GET("/getAll", h.getAllCourse)
 		course.GET("/getById/:id", h.getCourseById)
 		course.GET("/getByName/:name", h.getCourseByName)
+	}
+	direction := router.Group("/direction", h.userIdentity)
+	{
+		direction.GET("/getAll", h.getAllDirection)
+		direction.GET("/getById/:id", h.getDirectionById)
+		direction.GET("/getByName/:name", h.getDirectionByName)
 	}
 
 	return router

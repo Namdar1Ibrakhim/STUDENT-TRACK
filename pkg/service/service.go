@@ -32,10 +32,18 @@ type Course interface {
 	GetCourseByName(courseName string)(dto.CourseResponse, error) 
 }
 
+type Direction interface {
+	GetAllDirection() ([]dto.CourseResponse, error)
+	GetDirectionById(directionId int) (dto.DirectionResponse, error) 
+	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
+}
+
+
 type Service struct {
 	Authorization
 	CSV
 	Course
+	Direction
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -43,5 +51,6 @@ func NewService(repos *repository.Repository) *Service {
 		Authorization: NewAuthService(repos.Authorization),
 		CSV:           NewCSVService(repos.Predictions),
 		Course:        NewCourseService(repos.Course),
+		Direction:     NewDirectionService(repos.Direction),
 	}
 }

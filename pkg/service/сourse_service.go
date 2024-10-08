@@ -14,13 +14,13 @@ func NewCourseService(repo repository.Course) *CourseService {
 }
 
 func (s *CourseService) GetAllCourse() ([]dto.CourseResponse, error) {
-    return s.repo.GetAll()
+    return s.repo.GetAllCourse()
 }
 
 func (s *CourseService) GetCourseById(courseId int) (dto.CourseResponse, error) {
-    return s.repo.GetById(courseId)
+    return s.repo.GetCourseById(courseId)
 }
 
 func (s *CourseService) GetCourseByName(courseName string) (dto.CourseResponse, error) {
-    return s.repo.GetByName(courseName)
+    return s.repo.GetCourseByName(courseName)
 }

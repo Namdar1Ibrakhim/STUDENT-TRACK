@@ -22,9 +22,15 @@ type Predictions interface {
 	
 }
 type Course interface {	
-	GetAll() ([]dto.CourseResponse, error)
-	GetById(courseId int) (dto.CourseResponse, error) 
-	GetByName(courseName string)(dto.CourseResponse, error) 
+	GetAllCourse() ([]dto.CourseResponse, error)
+	GetCourseById(courseId int) (dto.CourseResponse, error) 
+	GetCourseByName(courseName string)(dto.CourseResponse, error) 
+}
+
+type Direction interface {	
+	GetAllDirection() ([]dto.DirectionResponse, error)
+	GetDirectionById(directionId int) (dto.DirectionResponse, error) 
+	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
 }
 
 
@@ -32,6 +38,7 @@ type Repository struct {
 	Authorization
 	Predictions
 	Course
+	Direction
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -39,6 +46,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Authorization: NewAuthPostgres(db),
 		Predictions:   NewPredictionsPostgres(db),
 		Course: 	   NewCourseRepository(db),
+		Direction:     NewDirectionRepository(db),
 	}
 }
 

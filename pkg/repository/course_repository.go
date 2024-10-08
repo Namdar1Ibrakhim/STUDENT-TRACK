@@ -13,7 +13,7 @@ func NewCourseRepository(db *sqlx.DB) *CourseRepository {
 	return &CourseRepository{db: db}
 }
 
-func (r *CourseRepository) GetAll() ([]dto.CourseResponse, error) {
+func (r *CourseRepository) GetAllCourse() ([]dto.CourseResponse, error) {
 	query := "SELECT id, course_name, description FROM course"
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -38,7 +38,7 @@ func (r *CourseRepository) GetAll() ([]dto.CourseResponse, error) {
 	return courses, nil
 }
 
-func (r *CourseRepository) GetById(courseId int) (dto.CourseResponse, error) {
+func (r *CourseRepository) GetCourseById(courseId int) (dto.CourseResponse, error) {
 	var course dto.CourseResponse
 	query := "SELECT id, course_name, description FROM course WHERE id = $1"
 
@@ -50,7 +50,7 @@ func (r *CourseRepository) GetById(courseId int) (dto.CourseResponse, error) {
 	return course, nil
 }
 
-func (r *CourseRepository) GetByName(courseName string) (dto.CourseResponse, error) {
+func (r *CourseRepository) GetCourseByName(courseName string) (dto.CourseResponse, error) {
 	var course dto.CourseResponse
 	query := "SELECT id, course_name, description FROM course WHERE course_name = $1"
 
