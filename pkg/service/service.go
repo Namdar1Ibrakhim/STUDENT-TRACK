@@ -27,7 +27,9 @@ type CSV interface {
 }
 
 type Course interface {
-	GetAll() ([]dto.CourseResponse, error)
+	GetAllCourse() ([]dto.CourseResponse, error)
+	GetCourseById(courseId int) (dto.CourseResponse, error) 
+	GetCourseByName(courseName string)(dto.CourseResponse, error) 
 }
 
 type Service struct {
