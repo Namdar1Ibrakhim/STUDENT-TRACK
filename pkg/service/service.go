@@ -23,13 +23,13 @@ type Authorization interface {
 
 type CSV interface {
 	ValidateCSV(file io.Reader) error
-	ProcessCSV(studentId int, file io.Reader) error
+	PredictCSV(studentId int, file io.Reader) (string, error)
 }
 
 type Course interface {
 	GetAllCourse() ([]dto.CourseResponse, error)
-	GetCourseById(courseId int) (dto.CourseResponse, error) 
-	GetCourseByName(courseName string)(dto.CourseResponse, error) 
+	GetCourseById(courseId int) (dto.CourseResponse, error)
+	GetCourseByName(courseName string) (dto.CourseResponse, error)
 }
 
 type Service struct {

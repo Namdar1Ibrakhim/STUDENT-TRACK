@@ -3,17 +3,33 @@ package service
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 )
+
+type PredictionRequest struct {
+	OperatingSystem      int    `json:"Operating System"`
+	AnalysisOfAlgorithm  int    `json:"Analysis of Algorithm"`
+	ProgrammingConcept   int    `json:"Programming Concept"`
+	SoftwareEngineering  int    `json:"Software Engineering"`
+	ComputerNetwork      int    `json:"Computer Network"`
+	AppliedMathematics   int    `json:"Applied Mathematics"`
+	ComputerSecurity     int    `json:"Computer Security"`
+	HackathonsAttended   int    `json:"Hackathons attended"`
+	TopmostCertification string `json:"Topmost Certification"`
+	Personality          string `json:"Personality"`
+	ManagementTechnical  string `json:"Management or technical"`
+	Leadership           string `json:"Leadership"`
+	Team                 string `json:"Team"`
+	SelfAbility          string `json:"Self Ability"`
+}
 
 type CSVService struct {
 	repo repository.Predictions
@@ -21,6 +37,11 @@ type CSVService struct {
 
 func NewCSVService(repo repository.Predictions) *CSVService {
 	return &CSVService{repo: repo}
+}
+
+func parseInt(num string) int {
+	result, _ := strconv.Atoi(num)
+	return result
 }
 
 func (s *CSVService) ValidateCSV(file io.Reader) error {
@@ -76,63 +97,64 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 	return nil
 }
 
-func (s *CSVService) ProcessCSV(studentId int, file io.Reader) error {
-	tempFile, err := os.CreateTemp("", "upload-*.csv")
+func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
+	reader := csv.NewReader(file)
+
+	records, err := reader.ReadAll()
 	if err != nil {
-		return fmt.Errorf("не удалось создать временный файл: %v", err)
+		return "", errors.New("invalid CSV structure")
 	}
-	defer os.Remove(tempFile.Name())
+	row := records[1]
 
-	// Записываем содержимое файла во временный файл
-	if _, err := io.Copy(tempFile, file); err != nil {
-		return fmt.Errorf("не удалось записать файл: %v", err)
+	predictionRequest := PredictionRequest{
+		OperatingSystem:      parseInt(row[0]),
+		AnalysisOfAlgorithm:  parseInt(row[1]),
+		ProgrammingConcept:   parseInt(row[2]),
+		SoftwareEngineering:  parseInt(row[3]),
+		ComputerNetwork:      parseInt(row[4]),
+		AppliedMathematics:   parseInt(row[5]),
+		ComputerSecurity:     parseInt(row[6]),
+		HackathonsAttended:   parseInt(row[7]),
+		TopmostCertification: row[8],
+		Personality:          row[9],
+		ManagementTechnical:  row[10],
+		Leadership:           row[11],
+		Team:                 row[12],
+		SelfAbility:          row[13],
 	}
 
-	// Возвращаемся к началу файла для дальнейшего чтения
-	tempFile.Seek(0, 0)
-
-	// Отправляем POST запрос
-	url := "http://localhost:5000/upload_csv" // Замените на ваш URL
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	part, err := writer.CreateFormFile("file", tempFile.Name())
+	jsonData, err := json.Marshal(predictionRequest)
 	if err != nil {
-		return fmt.Errorf("не удалось создать часть формы: %v", err)
+		return "", err
 	}
 
-	if _, err := io.Copy(part, tempFile); err != nil {
-		return fmt.Errorf("не удалось скопировать файл в часть формы: %v", err)
-	}
-
-	// Закрываем writer, чтобы завершить формирование тела запроса
-	writer.Close()
-
-	// Выполняем POST запрос
-	req, err := http.NewRequest("POST", url, body)
+	resp, err := http.Post("http://localhost:5001/predict", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return fmt.Errorf("не удалось создать запрос: %v", err)
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("не удалось выполнить запрос: %v", err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("получен неожиданный статус ответа: %s", resp.Status)
+		return "", fmt.Errorf("ML service status -->: %d", resp.StatusCode)
 	}
 
-	err = s.repo.SavePrediction(studentId, resp.Proto) // сохраняем данные в бдшку
-
-	if err == nil {
-		return fmt.Errorf("не удалось сохранить Предикшн студента: %v", err)
+	var result map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return "", errors.New("failed to decode ML service response")
 	}
-	//////....
-	return nil
+
+	prediction, ok := result["predicted_track"].(string)
+	if !ok {
+		return "", errors.New("invalid prediction format")
+	}
+
+	err = s.repo.SavePrediction(studentId, prediction)
+	if err != nil {
+		return "", errors.New("failed to save prediction")
+	}
+
+	return prediction, nil
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {
