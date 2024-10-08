@@ -33,7 +33,7 @@ type Course interface {
 }
 
 type Direction interface {
-	GetAllDirection() ([]dto.CourseResponse, error)
+	GetAllDirection() ([]dto.DirectionResponse, error)
 	GetDirectionById(directionId int) (dto.DirectionResponse, error) 
 	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
 }
