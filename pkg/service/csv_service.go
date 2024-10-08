@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
+	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"strconv"
@@ -112,7 +113,7 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 		return "", err
 	}
 
-	resp, err := http.Post("http://localhost:5001/predict", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(viper.GetString("url"), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", err
 	}

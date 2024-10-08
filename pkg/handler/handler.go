@@ -54,6 +54,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	main := router.Group("/main", h.userIdentity)
 	{
 		main.POST("/upload-csv", h.UploadCSV)
+		main.POST("/upload-csv/predict", h.PredictCSV)
 		/////////////
 		//Example CSV file
 
