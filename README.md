@@ -16,3 +16,5 @@ Test_DB =  'postgresql://track:jFXmrOm5VE0eSl5xFpo9BKJRcN1zZkj9@dpg-crhk8g3v2p9s
 How to run app:
 * go run cmd/main.go
 
+Postman Collections: 
+* 
