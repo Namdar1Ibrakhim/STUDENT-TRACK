@@ -12,7 +12,7 @@ CREATE TABLE course
 (
     id            serial       NOT NULL UNIQUE,
     course_name   varchar(255) NOT NULL,
-    description   varchar(255) NOT NULL
+    description   varchar(255)
 );
 
 CREATE TABLE student_course
@@ -29,7 +29,14 @@ CREATE TABLE prediction
 (
     id                serial       NOT NULL UNIQUE,
     student_id        INT          NOT NULL,
-    prediction_text   varchar(255) NOT NULL,
+    direction_id      varchar(255) NOT NULL,
     created_at        timestamp    DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE direction
+(
+    id                serial       NOT NULL UNIQUE,
+    direction_name    varchar(255) NOT NULL,
+    description       varchar(255)
+)

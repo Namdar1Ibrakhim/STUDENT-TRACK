@@ -1,11 +1,12 @@
 package service
 
 import (
+	"io"
+
 	track "github.com/Namdar1Ibrakhim/student-track-system"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
-	"io"
 )
 
 // Все сервисные интерфейсы пишем здесь
@@ -25,14 +26,20 @@ type CSV interface {
 	ProcessCSV(studentId int, file io.Reader) error
 }
 
+type Course interface {
+	GetAll() ([]dto.CourseResponse, error)
+}
+
 type Service struct {
 	Authorization
 	CSV
+	Course
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		CSV:           NewCSVService(repos.Predictions),
+		Course:        NewCourseService(repos.Course),
 	}
 }

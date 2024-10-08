@@ -21,15 +21,24 @@ type Predictions interface {
 	SavePrediction(userId int, predictions string) error
 	
 }
+type Course interface {	
+	GetAll() ([]dto.CourseResponse, error)
+	GetById(courseId int) (dto.CourseResponse, error) 
+	GetByName(courseName string)(dto.CourseResponse, error) 
+}
+
 
 type Repository struct {
 	Authorization
 	Predictions
+	Course
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
 		Predictions:   NewPredictionsPostgres(db),
+		Course: 	   NewCourseRepository(db),
 	}
 }
+
