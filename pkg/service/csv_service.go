@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"io"
 	"net/http"
 	"strconv"
@@ -13,23 +14,6 @@ import (
 
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 )
-
-type PredictionRequest struct {
-	OperatingSystem      int    `json:"Operating System"`
-	AnalysisOfAlgorithm  int    `json:"Analysis of Algorithm"`
-	ProgrammingConcept   int    `json:"Programming Concept"`
-	SoftwareEngineering  int    `json:"Software Engineering"`
-	ComputerNetwork      int    `json:"Computer Network"`
-	AppliedMathematics   int    `json:"Applied Mathematics"`
-	ComputerSecurity     int    `json:"Computer Security"`
-	HackathonsAttended   int    `json:"Hackathons attended"`
-	TopmostCertification string `json:"Topmost Certification"`
-	Personality          string `json:"Personality"`
-	ManagementTechnical  string `json:"Management or technical"`
-	Leadership           string `json:"Leadership"`
-	Team                 string `json:"Team"`
-	SelfAbility          string `json:"Self Ability"`
-}
 
 type CSVService struct {
 	repo repository.Predictions
@@ -106,7 +90,7 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 	}
 	row := records[1]
 
-	predictionRequest := PredictionRequest{
+	predictionRequest := dto.PredictionDataOfCSVRequest{
 		OperatingSystem:      parseInt(row[0]),
 		AnalysisOfAlgorithm:  parseInt(row[1]),
 		ProgrammingConcept:   parseInt(row[2]),
