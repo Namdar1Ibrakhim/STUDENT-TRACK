@@ -13,6 +13,6 @@ func NewPredictionsPostgres(db *sqlx.DB) *PredictionsPostgres {
 }
 
 func (r *PredictionsPostgres) SavePrediction(userId int, predictions string) error {
-	_, err := r.db.Exec("INSERT INTO prediction (user_id, prediction_text) VALUES ($1, $2)", userId, predictions)
+	_, err := r.db.Exec("INSERT INTO prediction (student_id, prediction_text) VALUES ($1, $2)", userId, predictions)
 	return err
 }

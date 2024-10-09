@@ -8,3 +8,5 @@ db:
   port: "5432"
   dbname: "track_vk5b"
   sslmode: "require"
+
+url: "http://localhost:5001/predict"
