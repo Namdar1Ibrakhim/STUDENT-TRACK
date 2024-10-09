@@ -44,6 +44,7 @@ type StudentCourse interface {
 	GetStudentCourseByStudentId(studentId int) (dto.StudentCourseResponse, error)
 	GetStudentCourseByCourseId(courseId int) (dto.StudentCourseResponse, error)
 	GetAllStudentCourseByFilter(pageSize int, page int, sortByGrades string) ([]dto.StudentCourseResponse, error)
+	AddStudentCourse(student_id int, course_id int, grades int) error
 }
 
 

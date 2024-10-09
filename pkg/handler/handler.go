@@ -45,6 +45,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	// Пример изменения профиля юзеров по ID и проверяет доступ на админа
 	profile := router.Group("/profile", h.userIdentity)
 	{
+		profile.GET("/get", h.getUser)
 		profile.PUT("/users/:id", h.UpdateUser)
 		profile.DELETE("/users/:id", h.DeleteUser) //удаление акк через админ и юзер
 		profile.GET("/editPassword/:password", h.editPasswordByCurrentUserId)

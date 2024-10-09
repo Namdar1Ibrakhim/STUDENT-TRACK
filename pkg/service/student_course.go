@@ -41,3 +41,8 @@ func (s *StudentCourseService) GetStudentCourseByStudentId(studentId int) (dto.S
 func (s *StudentCourseService) GetStudentCourseByCourseId(courseId int) (dto.StudentCourseResponse, error) {
 	return s.repo.GetStudentCourseByCourseId(courseId)
 }
+
+func (s *StudentCourseService) AddStudentCourse(studentID int, courseID int, grades int) error {
+    err := s.repo.AddStudentCourse(studentID, courseID, grades)
+    return err
+}

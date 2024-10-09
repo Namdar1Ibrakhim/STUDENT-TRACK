@@ -13,6 +13,12 @@ func NewStudentCoursePostgres(db *sqlx.DB) *StudentCourseRepository {
 	return &StudentCourseRepository{db: db}
 }
 
+func (r *StudentCourseRepository) AddStudentCourse(studentId int, courseId int, grades int) error {
+    query := "INSERT INTO student_courses (student_id, course_id, grades) VALUES ($1, $2, $3)"
+    _, err := r.db.Exec(query, studentId, courseId, grades)
+    return err
+}
+
 func (r *StudentCourseRepository) GetAllStudentCourse() ([]dto.StudentCourseResponse, error) {
 	query := "SELECT id, student_id, course_id, grades FROM student_course"
 	rows, err := r.db.Query(query)
