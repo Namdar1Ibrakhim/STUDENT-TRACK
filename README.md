@@ -18,3 +18,6 @@ How to run app:
 
 Postman Collections: 
 * 
+
+![Uploading image.png…]()
+
