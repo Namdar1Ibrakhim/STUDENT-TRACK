@@ -19,34 +19,41 @@ type Authorization interface {
 
 type Predictions interface {
 	SavePrediction(userId int, predictions string) error
-	
 }
-type Course interface {	
+type Course interface {
 	GetAllCourse() ([]dto.CourseResponse, error)
-	GetCourseById(courseId int) (dto.CourseResponse, error) 
-	GetCourseByName(courseName string)(dto.CourseResponse, error) 
+	GetCourseById(courseId int) (dto.CourseResponse, error)
+	GetCourseByName(courseName string) (dto.CourseResponse, error)
 }
 
-type Direction interface {	
+type Direction interface {
 	GetAllDirection() ([]dto.DirectionResponse, error)
-	GetDirectionById(directionId int) (dto.DirectionResponse, error) 
-	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
+	GetDirectionById(directionId int) (dto.DirectionResponse, error)
+	GetDirectionByName(directionName string) (dto.DirectionResponse, error)
 }
 
+type StudentCourse interface {
+	GetAllStudentCourse() ([]dto.StudentCourseResponse, error)
+	GetStudentCourseById(studentCourseId int) (dto.StudentCourseResponse, error)
+	GetStudentCourseByStudentId(studentId int) (dto.StudentCourseResponse, error)
+	GetStudentCourseByCourseId(courseId int) (dto.StudentCourseResponse, error)
+	GetAllStudentCourseByFilter(limit, page int, sortByGrades *string) ([]dto.StudentCourseResponse, error)
+}
 
 type Repository struct {
 	Authorization
 	Predictions
 	Course
 	Direction
+	StudentCourse
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
 		Predictions:   NewPredictionsPostgres(db),
-		Course: 	   NewCourseRepository(db),
+		Course:        NewCourseRepository(db),
 		Direction:     NewDirectionRepository(db),
+		StudentCourse: NewStudentCoursePostgres(db),
 	}
 }
-

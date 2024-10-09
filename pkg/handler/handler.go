@@ -69,11 +69,22 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		course.GET("/getById/:id", h.getCourseById)
 		course.GET("/getByName/:name", h.getCourseByName)
 	}
+
 	direction := router.Group("/direction", h.userIdentity)
 	{
 		direction.GET("/getAll", h.getAllDirection)
 		direction.GET("/getById/:id", h.getDirectionById)
 		direction.GET("/getByName/:name", h.getDirectionByName)
+	}
+
+	student_course := router.Group("/studentCourse", h.userIdentity)
+	{
+		student_course.GET("/getAll", h.getAllStudentCourse)
+		student_course.GET("/getById/:id", h.getStudentCourseById)
+		student_course.GET("/getByStudentId/:studentId", h.getStudentCourseByStudentId)
+		student_course.GET("/getByCourseId/:courseId", h.getStudentCourseByCourseId)
+		student_course.GET("/getByFilter", h.getAllStudentCourseByFilter)		
+
 	}
 
 	return router

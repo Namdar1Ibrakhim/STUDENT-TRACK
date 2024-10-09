@@ -38,12 +38,21 @@ type Direction interface {
 	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
 }
 
+type StudentCourse interface {
+	GetAllStudentCourse() ([]dto.StudentCourseResponse, error)
+	GetStudentCourseById(studentCourseId int) (dto.StudentCourseResponse, error)
+	GetStudentCourseByStudentId(studentId int) (dto.StudentCourseResponse, error)
+	GetStudentCourseByCourseId(courseId int) (dto.StudentCourseResponse, error)
+	GetAllStudentCourseByFilter(pageSize int, page int, sortByGrades string) ([]dto.StudentCourseResponse, error)
+}
+
 
 type Service struct {
 	Authorization
 	CSV
 	Course
 	Direction
+	StudentCourse
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -52,5 +61,6 @@ func NewService(repos *repository.Repository) *Service {
 		CSV:           NewCSVService(repos.Predictions),
 		Course:        NewCourseService(repos.Course),
 		Direction:     NewDirectionService(repos.Direction),
+		StudentCourse: NewStudentCourseService(repos.StudentCourse),
 	}
 }
