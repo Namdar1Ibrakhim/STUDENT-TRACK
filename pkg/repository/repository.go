@@ -18,18 +18,20 @@ type Authorization interface {
 }
 
 type Predictions interface {
-	SavePrediction(userId int, predictions string) error
+	SavePrediction(userId int, directionId int) error
 }
 type Course interface {
 	GetAllCourse() ([]dto.CourseResponse, error)
 	GetCourseById(courseId int) (dto.CourseResponse, error)
 	GetCourseByName(courseName string) (dto.CourseResponse, error)
+	FindCourseIDByName(courseName string) (int, error)
 }
 
 type Direction interface {
 	GetAllDirection() ([]dto.DirectionResponse, error)
 	GetDirectionById(directionId int) (dto.DirectionResponse, error)
 	GetDirectionByName(directionName string) (dto.DirectionResponse, error)
+	FindDirectionIDByName(directionName string) (int, error)
 }
 
 type StudentCourse interface {

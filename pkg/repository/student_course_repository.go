@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/jmoiron/sqlx"
 )
@@ -14,9 +15,12 @@ func NewStudentCoursePostgres(db *sqlx.DB) *StudentCourseRepository {
 }
 
 func (r *StudentCourseRepository) AddStudentCourse(studentId int, courseId int, grades int) error {
-    query := "INSERT INTO student_courses (student_id, course_id, grades) VALUES ($1, $2, $3)"
-    _, err := r.db.Exec(query, studentId, courseId, grades)
-    return err
+	query := "INSERT INTO student_course (student_id, course_id, grades) VALUES ($1, $2, $3)"
+	_, err := r.db.Exec(query, studentId, courseId, grades)
+	if err != nil {
+		return fmt.Errorf("failed to save student course data: %v", err)
+	}
+	return nil
 }
 
 func (r *StudentCourseRepository) GetAllStudentCourse() ([]dto.StudentCourseResponse, error) {
@@ -118,4 +122,3 @@ func (r *StudentCourseRepository) GetAllStudentCourseByFilter(limit, page int, s
 
 	return studentCourses, nil
 }
-

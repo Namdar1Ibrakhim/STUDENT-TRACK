@@ -17,13 +17,20 @@ import (
 )
 
 type CSVService struct {
-	repo repository.Predictions
+	repo  repository.Predictions
+	repo2 repository.Course
+	repo3 repository.StudentCourse
+	repo4 repository.Direction
 }
 
-func NewCSVService(repo repository.Predictions) *CSVService {
-	return &CSVService{repo: repo}
+func NewCSVService(repo repository.Predictions, repo2 repository.Course, repo3 repository.StudentCourse, repo4 repository.Direction) *CSVService {
+	return &CSVService{
+		repo:  repo,
+		repo2: repo2,
+		repo3: repo3,
+		repo4: repo4,
+	}
 }
-
 func parseInt(num string) int {
 	result, _ := strconv.Atoi(num)
 	return result
@@ -89,7 +96,30 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 	if err != nil {
 		return "", errors.New("invalid CSV structure")
 	}
+
 	row := records[1]
+
+	courses := map[string]int{
+		"Operating System":      parseInt(row[0]),
+		"Analysis of Algorithm": parseInt(row[1]),
+		"Programming Concept":   parseInt(row[2]),
+		"Software Engineering":  parseInt(row[3]),
+		"Computer Network":      parseInt(row[4]),
+		"Applied Mathematics":   parseInt(row[5]),
+		"Computer Security":     parseInt(row[6]),
+	}
+
+	for courseName, grade := range courses {
+		courseID, err := s.repo2.FindCourseIDByName(courseName)
+		if err != nil {
+			return "", fmt.Errorf("failed to find course ID for %s: %v", courseName, err)
+		}
+
+		err = s.repo3.AddStudentCourse(studentId, courseID, grade)
+		if err != nil {
+			return "", fmt.Errorf("failed to save course data for student: %v", err)
+		}
+	}
 
 	predictionRequest := dto.PredictionDataOfCSVRequest{
 		OperatingSystem:      parseInt(row[0]),
@@ -134,7 +164,12 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 		return "", errors.New("invalid prediction format")
 	}
 
-	err = s.repo.SavePrediction(studentId, prediction)
+	directionID, err := s.repo4.FindDirectionIDByName(prediction)
+	if err != nil {
+		return "", fmt.Errorf("failed to find direction ID for predicted track: %v", err)
+	}
+
+	err = s.repo.SavePrediction(studentId, directionID)
 	if err != nil {
 		return "", errors.New("failed to save prediction")
 	}

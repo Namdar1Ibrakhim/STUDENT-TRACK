@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/jmoiron/sqlx"
 )
@@ -60,4 +61,14 @@ func (r *DirectionRepository) GetDirectionByName(directionName string) (dto.Dire
 	}
 
 	return direction, nil
+}
+
+func (r *DirectionRepository) FindDirectionIDByName(directionName string) (int, error) {
+	var directionId int
+	query := fmt.Sprintf("SELECT id FROM %s WHERE direction_name = $1", directionTable)
+	err := r.db.Get(&directionId, query, directionName)
+	if err != nil {
+		return 0, fmt.Errorf("direction not found: %v", err)
+	}
+	return directionId, nil
 }
