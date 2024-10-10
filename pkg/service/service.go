@@ -23,7 +23,7 @@ type Authorization interface {
 
 type CSV interface {
 	ValidateCSV(file io.Reader) error
-	PredictCSV(studentId int, file io.Reader) (string, error)
+	PredictCSV(studentId int, file io.Reader) (*dto.PredictionResponseDto, error)
 }
 
 type Course interface {
