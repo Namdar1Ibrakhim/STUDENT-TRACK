@@ -23,7 +23,7 @@ type Authorization interface {
 
 type CSV interface {
 	ValidateCSV(file io.Reader) error
-	PredictCSV(studentId int, file io.Reader) (string, error)
+	PredictCSV(studentId int, file io.Reader) (*dto.PredictionResponseDto, error)
 }
 
 type Course interface {
@@ -34,8 +34,8 @@ type Course interface {
 
 type Direction interface {
 	GetAllDirection() ([]dto.DirectionResponse, error)
-	GetDirectionById(directionId int) (dto.DirectionResponse, error) 
-	GetDirectionByName(directionName string)(dto.DirectionResponse, error) 
+	GetDirectionById(directionId int) (dto.DirectionResponse, error)
+	GetDirectionByName(directionName string) (dto.DirectionResponse, error)
 }
 
 type StudentCourse interface {
@@ -46,7 +46,6 @@ type StudentCourse interface {
 	GetAllStudentCourseByFilter(pageSize int, page int, sortByGrades string) ([]dto.StudentCourseResponse, error)
 	AddStudentCourse(student_id int, course_id int, grades int) error
 }
-
 
 type Service struct {
 	Authorization
@@ -59,7 +58,7 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
-		CSV:           NewCSVService(repos.Predictions),
+		CSV:           NewCSVService(repos.Predictions, repos.Course, repos.StudentCourse, repos.Direction),
 		Course:        NewCourseService(repos.Course),
 		Direction:     NewDirectionService(repos.Direction),
 		StudentCourse: NewStudentCourseService(repos.StudentCourse),

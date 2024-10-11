@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/jmoiron/sqlx"
 )
@@ -60,4 +61,14 @@ func (r *CourseRepository) GetCourseByName(courseName string) (dto.CourseRespons
 	}
 
 	return course, nil
+}
+
+func (r *CourseRepository) FindCourseIDByName(courseName string) (int, error) {
+	var courseID int
+	query := fmt.Sprintf("SELECT id FROM %s WHERE course_name = $1", courseTable)
+	err := r.db.Get(&courseID, query, courseName)
+	if err != nil {
+		return 0, fmt.Errorf("course not found -> %v", courseName)
+	}
+	return courseID, nil
 }

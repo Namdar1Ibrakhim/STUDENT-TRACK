@@ -18,13 +18,20 @@ import (
 )
 
 type CSVService struct {
-	repo repository.Predictions
+	repo  repository.Predictions
+	repo2 repository.Course
+	repo3 repository.StudentCourse
+	repo4 repository.Direction
 }
 
-func NewCSVService(repo repository.Predictions) *CSVService {
-	return &CSVService{repo: repo}
+func NewCSVService(repo repository.Predictions, repo2 repository.Course, repo3 repository.StudentCourse, repo4 repository.Direction) *CSVService {
+	return &CSVService{
+		repo:  repo,
+		repo2: repo2,
+		repo3: repo3,
+		repo4: repo4,
+	}
 }
-
 func parseInt(num string) int {
 	result, _ := strconv.Atoi(num)
 	return result
@@ -83,14 +90,37 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 	return nil
 }
 
-func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
+func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionResponseDto, error) {
 	reader := csv.NewReader(file)
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		return "", errors.New("invalid CSV structure")
+		return nil, errors.New("invalid CSV structure")
 	}
+
 	row := records[1]
+
+	courses := map[string]int{
+		"Operating System":      parseInt(row[0]),
+		"Analysis of Algorithm": parseInt(row[1]),
+		"Programming Concept":   parseInt(row[2]),
+		"Software Engineering":  parseInt(row[3]),
+		"Computer Network":      parseInt(row[4]),
+		"Applied Mathematics":   parseInt(row[5]),
+		"Computer Security":     parseInt(row[6]),
+	}
+
+	for courseName, grade := range courses {
+		courseID, err := s.repo2.FindCourseIDByName(courseName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find course ID for %s: %v", courseName, err)
+		}
+
+		err = s.repo3.AddStudentCourse(studentId, courseID, grade)
+		if err != nil {
+			return nil, fmt.Errorf("failed to save course data for student: %v", err)
+		}
+	}
 
 	predictionRequest := dto.PredictionDataOfCSVRequest{
 		OperatingSystem:      parseInt(row[0]),
@@ -111,40 +141,58 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 
 	jsonData, err := json.Marshal(predictionRequest)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	resp, err := http.Post(viper.GetString("url"), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("ML service status -->: %d", resp.StatusCode)
+		return nil, fmt.Errorf("ML service status -->: %d", resp.StatusCode)
 	}
 
 	var result map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
-		return "", errors.New("failed to decode ML service response")
+		return nil, errors.New("failed to decode ML service response")
 	}
 
 	prediction, ok := result["predicted_track"].(string)
 	if !ok {
-		return "", errors.New("invalid prediction format")
+		return nil, errors.New("invalid prediction format")
 	}
 
+<<<<<<< HEAD
 	//******//
 
 	err = s.repo.SavePrediction(studentId, prediction)
+=======
+	directionID, err := s.repo4.FindDirectionIDByName(prediction)
+>>>>>>> e1e18e5e99ee210f33fd65ee2b1bb3d695728391
 	if err != nil {
-		return "", errors.New("failed to save prediction")
+		return nil, fmt.Errorf("failed to find direction ID for predicted track: %v", err)
 	}
 
+<<<<<<< HEAD
 	//******//
 
 	return prediction, nil
+=======
+	err = s.repo.SavePrediction(studentId, directionID)
+	if err != nil {
+		return nil, errors.New("failed to save prediction")
+	}
+
+	response := &dto.PredictionResponseDto{
+		PredictedTrack: prediction,
+		StudentId:      studentId,
+	}
+
+	return response, nil
+>>>>>>> e1e18e5e99ee210f33fd65ee2b1bb3d695728391
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {
