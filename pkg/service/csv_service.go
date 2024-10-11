@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
-	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
+	"github.com/spf13/viper"
 
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 )
@@ -134,10 +135,14 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (string, error) {
 		return "", errors.New("invalid prediction format")
 	}
 
+	//******//
+
 	err = s.repo.SavePrediction(studentId, prediction)
 	if err != nil {
 		return "", errors.New("failed to save prediction")
 	}
+
+	//******//
 
 	return prediction, nil
 }

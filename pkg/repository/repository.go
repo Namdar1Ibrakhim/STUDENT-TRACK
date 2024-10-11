@@ -18,7 +18,7 @@ type Authorization interface {
 }
 
 type Predictions interface {
-	SavePrediction(userId int, predictions string) error
+	SavePrediction(studentId int, directionId int) error
 }
 type Course interface {
 	GetAllCourse() ([]dto.CourseResponse, error)
@@ -40,6 +40,8 @@ type StudentCourse interface {
 	GetAllStudentCourseByFilter(limit, page int, sortByGrades *string) ([]dto.StudentCourseResponse, error)
 	AddStudentCourse(student_id int, course_id int, grades int) error
 }
+
+// type Prediction 
 
 type Repository struct {
 	Authorization
