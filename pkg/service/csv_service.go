@@ -165,22 +165,11 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		return nil, errors.New("invalid prediction format")
 	}
 
-<<<<<<< HEAD
-	//******//
-
-	err = s.repo.SavePrediction(studentId, prediction)
-=======
 	directionID, err := s.repo4.FindDirectionIDByName(prediction)
->>>>>>> e1e18e5e99ee210f33fd65ee2b1bb3d695728391
 	if err != nil {
 		return nil, fmt.Errorf("failed to find direction ID for predicted track: %v", err)
 	}
-
-<<<<<<< HEAD
-	//******//
-
-	return prediction, nil
-=======
+	
 	err = s.repo.SavePrediction(studentId, directionID)
 	if err != nil {
 		return nil, errors.New("failed to save prediction")
@@ -192,7 +181,6 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 	}
 
 	return response, nil
->>>>>>> e1e18e5e99ee210f33fd65ee2b1bb3d695728391
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {

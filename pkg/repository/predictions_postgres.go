@@ -2,6 +2,9 @@ package repository
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -13,16 +16,69 @@ func NewPredictionsPostgres(db *sqlx.DB) *PredictionsPostgres {
 	return &PredictionsPostgres{db: db}
 }
 
-<<<<<<< HEAD
 func (r *PredictionsPostgres) SavePrediction(studentId int, directionId int) error {
 	_, err := r.db.Exec("INSERT INTO prediction (student_id, direction_id) VALUES ($1, $2)", studentId, directionId)
-	return err
-=======
-func (r *PredictionsPostgres) SavePrediction(userId int, directionId int) error {
-	_, err := r.db.Exec("INSERT INTO prediction (student_id, direction_id) VALUES ($1, $2)", userId, directionId)
 	if err != nil {
 		return fmt.Errorf("failed to save prediction: %v", err)
 	}
 	return nil
->>>>>>> e1e18e5e99ee210f33fd65ee2b1bb3d695728391
+}
+
+func (r *PredictionsPostgres) GetPredictionsByStudentId(studentId int) (dto.PredictionResponse, error) {
+	var prediction dto.PredictionResponse
+	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE student_id = $1"
+
+	err := r.db.QueryRow(query, studentId).Scan(&prediction.Id, &prediction.StudentId, &prediction.DirectionId, &prediction.CreatedAt)
+	if err != nil {
+		return prediction, err
+	}
+
+	return prediction, nil
+}
+func (r *PredictionsPostgres) GetPredictionsByDirectionId(directionId int) (dto.PredictionResponse, error) {
+	var prediction dto.PredictionResponse
+	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE direction_id = $1"
+
+	err := r.db.QueryRow(query, directionId).Scan(&prediction.Id, &prediction.StudentId, &prediction.DirectionId, &prediction.CreatedAt)
+	if err != nil {
+		return prediction, err
+	}
+
+	return prediction, nil
+}
+func (r *PredictionsPostgres) GetPredictionsById(id int) (dto.PredictionResponse, error) {
+	var prediction dto.PredictionResponse
+	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE id = $1"
+
+	err := r.db.QueryRow(query, id).Scan(&prediction.Id, &prediction.StudentId, &prediction.DirectionId, &prediction.CreatedAt)
+	if err != nil {
+		return prediction, err
+	}
+
+	return prediction, nil
+}
+
+// Function to filter by a date range
+func (r *PredictionsPostgres) GetPredictionsByDateRange(studentId int, startDate, endDate string) ([]dto.PredictionResponse, error) {
+	start, err := time.Parse("2006-01-02", startDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid start date format: %v", err)
+	}
+
+	end, err := time.Parse("2006-01-02", endDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid end date format: %v", err)
+	}
+
+	var predictions []dto.PredictionResponse
+
+	// SQL query to filter by date range
+	query := `SELECT * FROM predictions WHERE student_id = $1 AND DATE(created_at) BETWEEN $2 AND $3`
+	err = r.db.Select(&predictions, query, studentId, start.Format("2006-01-02"), end.Format("2006-01-02"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return predictions, nil
 }
