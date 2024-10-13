@@ -11,6 +11,7 @@ const (
 	usersTable     = "users"
 	courseTable    = "course"
 	directionTable = "direction"
+	
 )
 
 type Config struct {

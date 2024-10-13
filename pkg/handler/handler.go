@@ -29,13 +29,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			instructorRoutes.POST("/sign-up", h.signUpInstructor)
 			instructorRoutes.POST("/sign-in", h.signIn)            // один метод для всех полей
 			instructorRoutes.GET("/student/:id", h.getStudentById) // получение студента по айди
+			instructorRoutes.GET("/get", h.getUser)
 
 		}
 
 		adminRoutes := router.Group("/admin")
 		{
 			adminRoutes.POST("/sign-up", h.signUpAdmin)
-			adminRoutes.POST("/sign-in", h.signIn)                                 // один метод для всех полей
+			adminRoutes.POST("/sign-in", h.signIn)
+			adminRoutes.GET("/get", h.getUser)
 			adminRoutes.GET("/user/:id", h.getUserById)                            // получение пользователя по айди
 			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей
 		}
@@ -85,7 +87,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		student_course.GET("/getById/:id", h.getStudentCourseById)
 		student_course.GET("/getByStudentId/:studentId", h.getStudentCourseByStudentId)
 		student_course.GET("/getByCourseId/:courseId", h.getStudentCourseByCourseId)
-		student_course.GET("/getByFilter", h.getAllStudentCourseByFilter)		
+		student_course.GET("/getByFilter", h.getAllStudentCourseByFilter)
 
 	}
 
