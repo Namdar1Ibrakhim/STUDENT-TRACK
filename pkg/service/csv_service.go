@@ -169,14 +169,21 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 	if err != nil {
 		return nil, fmt.Errorf("failed to find direction ID for predicted track: %v", err)
 	}
-	
+
 	err = s.repo.SavePrediction(studentId, directionID)
 	if err != nil {
 		return nil, errors.New("failed to save prediction")
 	}
 
+	direction, err := s.repo4.GetDirectionByName(prediction)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find direction: %v", err)
+	}
+
 	response := &dto.PredictionResponseDto{
-		PredictedTrack: prediction,
+		Id:             direction.Id,
+		Direction_name: direction.Direction_name,
+		Description:    direction.Description,
 		StudentId:      studentId,
 	}
 
