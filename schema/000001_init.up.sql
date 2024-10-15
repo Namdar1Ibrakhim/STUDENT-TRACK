@@ -68,7 +68,7 @@ VALUES
 ('Software Developer', 'Develop software applications'),
 ('DevOps Engineer', 'Integrate and manage development and operations systems'),
 ('Network Engineer', 'Design and maintain computer networks'),
-('IT Support Specialist');
+('IT Support Specialist', 'Fundamental role within an organizations IT team, ensuring the smooth operation and support of computer systems and networks');
 
 CREATE INDEX idx_course_name ON course(course_name);
 CREATE INDEX idx_direction_name ON direction(direction_name);
