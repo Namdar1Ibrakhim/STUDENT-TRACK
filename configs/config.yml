@@ -2,11 +2,11 @@ port: "8000"
 host: "localhost"
 
 db:
-  username: "track"
+  username: "postgres"
   # password: "XXJGFpgHrNIu8lv4825pfIwdk5yLkkXV"
-  host: "dpg-cs5pqu5umphs73b0sdmg-a.oregon-postgres.render.com"
+  host: "localhost"
   port: "5432"
-  dbname: "track_dlme"
-  sslmode: "require"
+  dbname: "mydb"
+  sslmode: "disable"
 
-url: "http://localhost:5001/predict"
+url: "https://ml-predict-app-production.up.railway.app/predict"

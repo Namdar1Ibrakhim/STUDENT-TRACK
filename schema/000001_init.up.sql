@@ -42,3 +42,27 @@ CREATE TABLE prediction
     FOREIGN KEY (direction_id) REFERENCES direction(id) ON DELETE CASCADE
 
 );
+
+-- Insert Courses
+INSERT INTO course (course_name, description)
+VALUES 
+('Operating System', 'Study of operating systems and their functionality'),
+('Analysis of Algorithm', 'Study of algorithms and their analysis'),
+('Programming Concept', 'Basic programming concepts and principles'),
+('Software Engineering', 'Software development processes and practices'),
+('Computer Network', 'Study of computer networks and communication'),
+('Applied Mathematics', 'Mathematics for computer science applications'),
+('Computer Security', 'Study of computer security and cryptography');
+
+
+-- Insert Directions
+INSERT INTO direction (direction_name, description)
+VALUES 
+('Database Administrator', 'Manage and maintain database systems'),
+('Data Scientist', 'Analyze data and build predictive models'),
+('IT Project Manager', 'Manage and oversee IT projects'),
+('Systems Administrator', 'Maintain and support system infrastructure'),
+('Cybersecurity Specialist', 'Specialize in protecting information systems'),
+('Software Developer', 'Develop software applications'),
+('DevOps Engineer', 'Integrate and manage development and operations systems'),
+('Network Engineer', 'Design and maintain computer networks');

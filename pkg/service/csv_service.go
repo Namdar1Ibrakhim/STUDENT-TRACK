@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -144,7 +145,10 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		return nil, err
 	}
 
+	log.Println("Server starting on port 8080")
 	resp, err := http.Post(viper.GetString("url"), "application/json", bytes.NewBuffer(jsonData))
+	log.Println()
+
 	if err != nil {
 		return nil, err
 	}
@@ -175,15 +179,8 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		return nil, errors.New("failed to save prediction")
 	}
 
-	direction, err := s.repo4.GetDirectionByName(prediction)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find direction: %v", err)
-	}
-
 	response := &dto.PredictionResponseDto{
-		Id:             direction.Id,
-		Direction_name: direction.Direction_name,
-		Description:    direction.Description,
+		Direction_name: prediction,
 		StudentId:      studentId,
 	}
 
