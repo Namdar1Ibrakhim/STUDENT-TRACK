@@ -1,6 +1,6 @@
 module github.com/Namdar1Ibrakhim/student-track-system
 
-go 1.23.1
+go 1.23.0
 
 require github.com/lib/pq v1.10.9
 
