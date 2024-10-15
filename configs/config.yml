@@ -3,7 +3,7 @@ host: "localhost"
 
 db:
   username: "postgres"
-  # password: "XXJGFpgHrNIu8lv4825pfIwdk5yLkkXV"
+  # password: ".ENV"
   host: "localhost"
   port: "5432"
   dbname: "mydb"
