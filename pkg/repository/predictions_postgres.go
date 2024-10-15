@@ -16,6 +16,32 @@ func NewPredictionsPostgres(db *sqlx.DB) *PredictionsPostgres {
 	return &PredictionsPostgres{db: db}
 }
 
+
+func (r *PredictionsPostgres) GetAllPrediction() ([]dto.PredictionResponse, error) {
+	query := "SELECT id, student_id, direction_id, created_at FROM prediction"
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var predictions []dto.PredictionResponse
+	for rows.Next() {
+		var prediction dto.PredictionResponse
+		err := rows.Scan(&prediction.Id, &prediction.StudentId, &prediction.DirectionId, &prediction.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		predictions = append(predictions, prediction)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return predictions, nil
+}
+
 func (r *PredictionsPostgres) SavePrediction(studentId int, directionId int) error {
 	_, err := r.db.Exec("INSERT INTO prediction (student_id, direction_id) VALUES ($1, $2)", studentId, directionId)
 	if err != nil {
@@ -24,7 +50,7 @@ func (r *PredictionsPostgres) SavePrediction(studentId int, directionId int) err
 	return nil
 }
 
-func (r *PredictionsPostgres) GetPredictionsByStudentId(studentId int) (dto.PredictionResponse, error) {
+func (r *PredictionsPostgres) GetPredictionByStudentId(studentId int) (dto.PredictionResponse, error) {
 	var prediction dto.PredictionResponse
 	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE student_id = $1"
 
@@ -35,7 +61,7 @@ func (r *PredictionsPostgres) GetPredictionsByStudentId(studentId int) (dto.Pred
 
 	return prediction, nil
 }
-func (r *PredictionsPostgres) GetPredictionsByDirectionId(directionId int) (dto.PredictionResponse, error) {
+func (r *PredictionsPostgres) GetPredictionByDirectionId(directionId int) (dto.PredictionResponse, error) {
 	var prediction dto.PredictionResponse
 	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE direction_id = $1"
 
@@ -46,7 +72,7 @@ func (r *PredictionsPostgres) GetPredictionsByDirectionId(directionId int) (dto.
 
 	return prediction, nil
 }
-func (r *PredictionsPostgres) GetPredictionsById(id int) (dto.PredictionResponse, error) {
+func (r *PredictionsPostgres) GetPredictionById(id int) (dto.PredictionResponse, error) {
 	var prediction dto.PredictionResponse
 	query := "SELECT id, student_id, direction_id, created_at FROM prediction WHERE id = $1"
 
@@ -59,7 +85,7 @@ func (r *PredictionsPostgres) GetPredictionsById(id int) (dto.PredictionResponse
 }
 
 // Function to filter by a date range
-func (r *PredictionsPostgres) GetPredictionsByDateRange(studentId int, startDate, endDate string) ([]dto.PredictionResponse, error) {
+func (r *PredictionsPostgres) GetPredictionByDateRange(studentId int, startDate, endDate string) ([]dto.PredictionResponse, error) {
 	start, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, fmt.Errorf("invalid start date format: %v", err)

@@ -28,8 +28,8 @@ func (s *StudentCourseService) GetAllStudentCourse() ([]dto.StudentCourseRespons
 }
 
 // Получение курса студента по его идентификатору
-func (s *StudentCourseService) GetStudentCourseById(courseId int) (dto.StudentCourseResponse, error) {
-	return s.repo.GetStudentCourseById(courseId)
+func (s *StudentCourseService) GetStudentCourseById(Id int) (dto.StudentCourseResponse, error) {
+	return s.repo.GetStudentCourseById(Id)
 }
 
 // Получение курса студента по идентификатору студента

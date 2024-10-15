@@ -47,12 +47,21 @@ type StudentCourse interface {
 	AddStudentCourse(student_id int, course_id int, grades int) error
 }
 
+type Prediction interface {
+	GetAllPrediction() ([]dto.PredictionResponse, error)
+	GetPredictionById(studentCourseId int) (dto.PredictionResponse, error)
+	GetPredictionByStudentId(studentId int) (dto.PredictionResponse, error)
+	GetPredictionByDirectionId(directionId int) (dto.PredictionResponse, error)
+	GetAllPredictionByFilter(pageSize int, page int, sortByGrades string) ([]dto.PredictionResponse, error)
+}
+
 type Service struct {
 	Authorization
 	CSV
 	Course
 	Direction
 	StudentCourse
+	Prediction
 }
 
 func NewService(repos *repository.Repository) *Service {
