@@ -35,11 +35,11 @@ func (h *Handler) signUpStudent(c *gin.Context) {
 func (h *Handler) signUpInstructor(c *gin.Context) {
 	var input track.User
 
-	h.checkRole(c, constants.RoleAdmin) //checking permisson
-	if c.IsAborted() {
-		newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
-		return
-	}
+	//h.checkRole(c, constants.RoleAdmin) //checking permisson         ...не нужно это для реги
+	//if c.IsAborted() {
+	//	newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
+	//	return
+	//}
 
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -59,12 +59,6 @@ func (h *Handler) signUpInstructor(c *gin.Context) {
 
 // SIGN UP FOR ADMIN
 func (h *Handler) signUpAdmin(c *gin.Context) {
-
-	h.checkRole(c, constants.RoleAdmin) //checking permisson
-	if c.IsAborted() {
-		newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
-		return
-	}
 
 	var input track.User
 	if err := c.BindJSON(&input); err != nil {

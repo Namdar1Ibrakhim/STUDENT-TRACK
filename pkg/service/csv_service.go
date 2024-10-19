@@ -6,16 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
+	"github.com/spf13/viper"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
-	"github.com/spf13/viper"
-
-	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 )
 
 type CSVService struct {
@@ -33,12 +30,13 @@ func NewCSVService(repo repository.Predictions, repo2 repository.Course, repo3 r
 		repo4: repo4,
 	}
 }
+
 func parseInt(num string) int {
 	result, _ := strconv.Atoi(num)
 	return result
 }
 
-func (s *CSVService) ValidateCSV(file io.Reader) error {
+func (s *CSVService) ValidateCSVForStudent(file io.Reader) error {
 	reader := csv.NewReader(file)
 
 	records, err := reader.ReadAll()
@@ -55,6 +53,29 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 		return errors.New("invalid CSV structure, expected columns: check the required format")
 	}
 
+	return s.validateRows(records, expectedHeaders, false)
+}
+
+func (s *CSVService) ValidateCSVForInstructor(file io.Reader) error {
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return errors.New("invalid CSV structure")
+	}
+
+	expectedHeaders := []string{
+		"Operating System", "Analysis of Algorithm", "Programming Concept", "Software Engineering",
+		"Computer Network", "Applied Mathematics", "Computer Security", "Hackathons attended",
+		"Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability", "student_id"}
+
+	if len(records) == 0 || !s.equalHeaders(records[0], expectedHeaders) {
+		return errors.New("invalid CSV structure, expected columns: check the required format(Instructor)")
+	}
+
+	return s.validateRows(records, expectedHeaders, true)
+}
+
+func (s *CSVService) validateRows(records [][]string, expectedHeaders []string, hasStudentID bool) error {
 	for i, row := range records[1:] {
 		if len(row) != len(expectedHeaders) {
 			return fmt.Errorf("invalid number of columns at row %d", i+2)
@@ -86,12 +107,21 @@ func (s *CSVService) ValidateCSV(file io.Reader) error {
 				return fmt.Errorf("missing value for '%s' at row %d", expectedHeaders[j], i+2)
 			}
 		}
+
+		//if hasStudentID {
+		//    if len(row) <= len(expectedHeaders) {
+		//        return fmt.Errorf("missing student_id at row %d", i+2)
+		//    }
+		//	if _, err := strconv.Atoi(row[len(expectedHeaders)]); err != nil {
+		//		return fmt.Errorf("invalid student_id at row %d", i+2)
+		//	}
+		//}
 	}
 
 	return nil
 }
 
-func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionResponseDto, error) {
+func (s *CSVService) PredictCSV(studentId int, file io.Reader, isInstructor bool) (map[int]*dto.PredictionResponseDto, error) {
 	reader := csv.NewReader(file)
 
 	records, err := reader.ReadAll()
@@ -99,8 +129,14 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		return nil, errors.New("invalid CSV structure")
 	}
 
-	row := records[1]
+	if isInstructor {
+		return s.predictForMultipleStudents(records)
+	} else {
+		return s.predictForSingleStudent(studentId, records[1])
+	}
+}
 
+func (s *CSVService) predictForSingleStudent(studentId int, row []string) (map[int]*dto.PredictionResponseDto, error) {
 	courses := map[string]int{
 		"Operating System":      parseInt(row[0]),
 		"Analysis of Algorithm": parseInt(row[1]),
@@ -110,7 +146,6 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		"Applied Mathematics":   parseInt(row[5]),
 		"Computer Security":     parseInt(row[6]),
 	}
-
 	for courseName, grade := range courses {
 		courseID, err := s.repo2.FindCourseIDByName(courseName)
 		if err != nil {
@@ -123,6 +158,49 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 		}
 	}
 
+	prediction, err := s.sendPredictionRequest(row)
+	if err != nil {
+		return nil, err
+	}
+
+	prediction.StudentId = studentId
+
+	directionID, err := s.repo4.FindDirectionIDByName(prediction.Direction_name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find direction ID for predicted track: %v", err)
+	}
+
+	err = s.repo.SavePrediction(studentId, directionID)
+	if err != nil {
+		return nil, errors.New("failed to save prediction")
+	}
+
+	return map[int]*dto.PredictionResponseDto{
+		studentId: prediction,
+	}, nil
+}
+
+func (s *CSVService) predictForMultipleStudents(records [][]string) (map[int]*dto.PredictionResponseDto, error) {
+	predictions := make(map[int]*dto.PredictionResponseDto)
+
+	for i, row := range records[1:] {
+		studentId, err := strconv.Atoi(row[14])
+		if err != nil {
+			return nil, fmt.Errorf("invalid student_id at row %d", i+2)
+		}
+
+		prediction, err := s.predictForSingleStudent(studentId, row[:14])
+		if err != nil {
+			return nil, fmt.Errorf("failed to predict for student_id %d: %v", studentId, err)
+		}
+
+		predictions[studentId] = prediction[studentId]
+	}
+
+	return predictions, nil
+}
+
+func (s *CSVService) sendPredictionRequest(row []string) (*dto.PredictionResponseDto, error) {
 	predictionRequest := dto.PredictionDataOfCSVRequest{
 		OperatingSystem:      parseInt(row[0]),
 		AnalysisOfAlgorithm:  parseInt(row[1]),
@@ -144,47 +222,26 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader) (*dto.PredictionR
 	if err != nil {
 		return nil, err
 	}
-
-	log.Println("Server starting on port 8080")
 	resp, err := http.Post(viper.GetString("url"), "application/json", bytes.NewBuffer(jsonData))
-	log.Println()
-
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("ML service status -->: %d", resp.StatusCode)
+		return nil, fmt.Errorf("ML service status --->: %d", resp.StatusCode)
 	}
 
-	var result map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	var result dto.PredictionResponseDto
+	var resultOfML map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&resultOfML)
 	if err != nil {
 		return nil, errors.New("failed to decode ML service response")
 	}
 
-	prediction, ok := result["predicted_track"].(string)
-	if !ok {
-		return nil, errors.New("invalid prediction format")
-	}
+	result.Direction_name, _ = resultOfML["predicted_track"].(string)
 
-	directionID, err := s.repo4.FindDirectionIDByName(prediction)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find direction ID for predicted track: %v", err)
-	}
-
-	err = s.repo.SavePrediction(studentId, directionID)
-	if err != nil {
-		return nil, errors.New("failed to save prediction")
-	}
-
-	response := &dto.PredictionResponseDto{
-		Direction_name: prediction,
-		StudentId:      studentId,
-	}
-
-	return response, nil
+	return &result, nil
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {

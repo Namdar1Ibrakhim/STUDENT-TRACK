@@ -22,8 +22,9 @@ type Authorization interface {
 }
 
 type CSV interface {
-	ValidateCSV(file io.Reader) error
-	PredictCSV(studentId int, file io.Reader) (*dto.PredictionResponseDto, error)
+	ValidateCSVForStudent(file io.Reader) error
+	ValidateCSVForInstructor(file io.Reader) error
+	PredictCSV(studentId int, file io.Reader, isInstructor bool) (map[int]*dto.PredictionResponseDto, error)
 }
 
 type Course interface {

@@ -40,7 +40,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			adminRoutes.GET("/get", h.getUser)
 			adminRoutes.GET("/user/:id", h.getUserById)                            // получение пользователя по айди
 			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей
-			adminRoutes.DELETE("/users/:id", h.DeleteUser) //удаление акк через админ и юзер
+			adminRoutes.DELETE("/users/:id", h.DeleteUser)                         //удаление акк через админ и юзер
 
 		}
 
@@ -90,7 +90,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		prediction.GET("/getByStudentId/:studentId", h.getPredictionByStudentId)
 		prediction.GET("/getByDirectionId/:directionId", h.getPredictionByDirectionId)
 	}
-
 
 	student_course := router.Group("/studentCourse", h.userIdentity)
 	{

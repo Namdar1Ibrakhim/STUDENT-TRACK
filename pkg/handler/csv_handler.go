@@ -3,10 +3,10 @@ package handler
 import (
 	"bytes"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
-	"strconv"
 	"sync"
 )
 
@@ -26,9 +26,26 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	}
 	defer src.Close()
 
-	err = h.services.ValidateCSV(src)
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+	userIdFromToken, exists := c.Get("userId")
+	if !exists {
+		newErrorResponse(c, http.StatusUnauthorized, "User Id not found")
+		return
+	}
+
+	if h.checkRole(c, constants.RoleInstructor) {
+		err = h.services.ValidateCSVForInstructor(src)
+		if err != nil {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+	} else if h.checkRole(c, constants.RoleStudent) {
+		err = h.services.ValidateCSVForStudent(src)
+		if err != nil {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+	} else {
+		newErrorResponse(c, http.StatusUnauthorized, "User Id not found")
 		return
 	}
 
@@ -37,12 +54,6 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	fileBytes, err := io.ReadAll(src)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, "Failed to read file content")
-		return
-	}
-
-	userIdFromToken, exists := c.Get(userCtx)
-	if !exists {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
 		return
 	}
 
@@ -68,18 +79,19 @@ func (h *Handler) PredictCSV(c *gin.Context) {
 
 	src := bytes.NewReader(fileBytes.([]byte))
 
-	studentIdParam := c.Query("student_id")
-	var studentId int
-	if h.checkRole(c, constants.RoleInstructor) || h.checkRole(c, constants.RoleAdmin) {
-		if studentIdParam == "" {
-			newErrorResponse(c, http.StatusInternalServerError, "missing student_id")
+	var predictions map[int]*dto.PredictionResponseDto
+	var err error
+
+	if h.checkRole(c, constants.RoleInstructor) {
+		predictions, err = h.services.PredictCSV(userIdFromToken.(int), src, true)
+		if err != nil {
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
-		studentId, _ = strconv.Atoi(studentIdParam)
 	} else if h.checkRole(c, constants.RoleStudent) {
-		studentId = userIdFromToken.(int)
-		if studentIdParam != "" && strconv.Itoa(studentId) != studentIdParam {
-			newErrorResponse(c, http.StatusForbidden, "you can upload only own dataset")
+		predictions, err = h.services.PredictCSV(userIdFromToken.(int), src, false)
+		if err != nil {
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else {
@@ -87,14 +99,8 @@ func (h *Handler) PredictCSV(c *gin.Context) {
 		return
 	}
 
-	prediction, err := h.services.PredictCSV(studentId, src)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Prediction generated successfully",
-		"prediction": prediction,
+		"prediction": predictions,
 	})
 }
