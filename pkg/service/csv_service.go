@@ -66,7 +66,7 @@ func (s *CSVService) ValidateCSVForInstructor(file io.Reader) error {
 	expectedHeaders := []string{
 		"Operating System", "Analysis of Algorithm", "Programming Concept", "Software Engineering",
 		"Computer Network", "Applied Mathematics", "Computer Security", "Hackathons attended",
-		"Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability", "student_id"}
+		"Topmost Certification", "Personality", "Management or technical", "Leadership", "Team", "Self Ability", "Student_id"}
 
 	if len(records) == 0 || !s.equalHeaders(records[0], expectedHeaders) {
 		return errors.New("invalid CSV structure, expected columns: check the required format(Instructor)")
@@ -108,14 +108,14 @@ func (s *CSVService) validateRows(records [][]string, expectedHeaders []string, 
 			}
 		}
 
-		//if hasStudentID {
-		//    if len(row) <= len(expectedHeaders) {
-		//        return fmt.Errorf("missing student_id at row %d", i+2)
-		//    }
-		//	if _, err := strconv.Atoi(row[len(expectedHeaders)]); err != nil {
-		//		return fmt.Errorf("invalid student_id at row %d", i+2)
-		//	}
-		//}
+		if hasStudentID {
+			if len(row) < len(expectedHeaders) {
+				return fmt.Errorf("missing student_id at row %d", i+2)
+			}
+			if _, err := strconv.Atoi(row[len(expectedHeaders)-1]); err != nil {
+				return fmt.Errorf("invalid student_id at row %d", i+2)
+			}
+		}
 	}
 
 	return nil
