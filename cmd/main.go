@@ -1,8 +1,6 @@
 package main
 
 import (
-	pb "github.com/Namdar1Ibrakhim/student-track-system/proto"
-	"google.golang.org/grpc"
 	"os"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
@@ -17,52 +15,43 @@ import (
 )
 
 func main() {
-	logrus.SetFormatter(new(logrus.JSONFormatter)) //Логгирование
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 
 	if err := initConfig(); err != nil {
-		logrus.Fatalf("error initializing configs: %s", err.Error()) //Проверка на инициализацию Конфигураций в функции ниже
+		logrus.Fatalf("error initializing config: %s", err.Error())
 	}
 
 	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading env variables: %s", err.Error()) //Проверка на инициализацию .env файла
+		logrus.Fatalf("error loading .env file: %s", err.Error())
 	}
 
-	db, err := repository.NewPostgresDB(repository.Config{ //создаем обьект NewPostgresDB реопзитория и инициализируем туда Конфигурации
+	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-
-		//из .env файлы
 		Password: os.Getenv("DB_PASSWORD"),
-		//
-
-		DBName:  viper.GetString("db.dbname"),
-		SSLMode: viper.GetString("db.sslmode"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
 	})
-
 	if err != nil {
-		logrus.Fatalf("failed to initialize db:  %s", err.Error()) //Проверка на инициализацию этого конфига
+		logrus.Fatalf("Error initializing DB: %s", err.Error())
 	}
 
 	mlAddress := viper.GetString("url")
-	conn, err := grpc.Dial(mlAddress, grpc.WithInsecure(), grpc.WithBlock())
+	grpcClient, err := track.NewGRPCClient(mlAddress) //устанавливает grpc connection, конфиграция
 	if err != nil {
 		logrus.Fatalf("Error connecting to ML: %s", err.Error())
 	}
-	defer conn.Close()
-
-	mlClient := pb.NewPredictionServiceClient(conn)
+	defer grpcClient.Close()
 
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos, mlClient)
+	services := service.NewService(repos, grpcClient.Client)
 	handlers := handler.NewHandler(services)
 
-	srv := new(track.Server)
-
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	server := new(track.Server)
+	if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
-
 }
 
 func initConfig() error { //Функция добавления конфигурации
