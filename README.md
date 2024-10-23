@@ -17,7 +17,4 @@ How to run app:
 * go run cmd/main.go
 
 Postman Collections: 
-* 
-
-![Uploading image.png…]()
 
