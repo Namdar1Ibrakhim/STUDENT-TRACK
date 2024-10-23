@@ -7,6 +7,7 @@ import (
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
+	pb "github.com/Namdar1Ibrakhim/student-track-system/proto"
 )
 
 // Все сервисные интерфейсы пишем здесь
@@ -65,10 +66,10 @@ type Service struct {
 	Prediction
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repos *repository.Repository, mlClient pb.PredictionServiceClient) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
-		CSV:           NewCSVService(repos.Predictions, repos.Course, repos.StudentCourse, repos.Direction),
+		CSV:           NewCSVService(repos.Predictions, repos.Course, repos.StudentCourse, repos.Direction, mlClient),
 		Course:        NewCourseService(repos.Course),
 		Direction:     NewDirectionService(repos.Direction),
 		StudentCourse: NewStudentCourseService(repos.StudentCourse),

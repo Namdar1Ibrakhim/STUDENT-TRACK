@@ -1,39 +1,45 @@
 package service
 
 import (
-	"bytes"
+	"context"
 	"encoding/csv"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
-	"github.com/spf13/viper"
+	pb "github.com/Namdar1Ibrakhim/student-track-system/proto"
 	"io"
-	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type CSVService struct {
-	repo  repository.Predictions
-	repo2 repository.Course
-	repo3 repository.StudentCourse
-	repo4 repository.Direction
+	repo     repository.Predictions
+	repo2    repository.Course
+	repo3    repository.StudentCourse
+	repo4    repository.Direction
+	mlClient pb.PredictionServiceClient
 }
 
-func NewCSVService(repo repository.Predictions, repo2 repository.Course, repo3 repository.StudentCourse, repo4 repository.Direction) *CSVService {
+func NewCSVService(repo repository.Predictions, repo2 repository.Course, repo3 repository.StudentCourse, repo4 repository.Direction, mlClient pb.PredictionServiceClient) *CSVService {
 	return &CSVService{
-		repo:  repo,
-		repo2: repo2,
-		repo3: repo3,
-		repo4: repo4,
+		repo:     repo,
+		repo2:    repo2,
+		repo3:    repo3,
+		repo4:    repo4,
+		mlClient: mlClient,
 	}
 }
 
 func parseInt(num string) int {
 	result, _ := strconv.Atoi(num)
 	return result
+}
+
+func parseInt32(num string) int32 {
+	result, _ := (strconv.Atoi(num))
+	return int32(result)
 }
 
 func (s *CSVService) ValidateCSVForStudent(file io.Reader) error {
@@ -201,15 +207,15 @@ func (s *CSVService) predictForMultipleStudents(records [][]string) (map[int]*dt
 }
 
 func (s *CSVService) sendPredictionRequest(row []string) (*dto.PredictionResponseDto, error) {
-	predictionRequest := dto.PredictionDataOfCSVRequest{
-		OperatingSystem:      parseInt(row[0]),
-		AnalysisOfAlgorithm:  parseInt(row[1]),
-		ProgrammingConcept:   parseInt(row[2]),
-		SoftwareEngineering:  parseInt(row[3]),
-		ComputerNetwork:      parseInt(row[4]),
-		AppliedMathematics:   parseInt(row[5]),
-		ComputerSecurity:     parseInt(row[6]),
-		HackathonsAttended:   parseInt(row[7]),
+	predictionRequest := &pb.PredictionRequest{
+		OperatingSystem:      parseInt32(row[0]),
+		AnalysisOfAlgorithm:  parseInt32(row[1]),
+		ProgrammingConcept:   parseInt32(row[2]),
+		SoftwareEngineering:  parseInt32(row[3]),
+		ComputerNetwork:      parseInt32(row[4]),
+		AppliedMathematics:   parseInt32(row[5]),
+		ComputerSecurity:     parseInt32(row[6]),
+		HackathonsAttended:   parseInt32(row[7]),
 		TopmostCertification: row[8],
 		Personality:          row[9],
 		ManagementTechnical:  row[10],
@@ -218,30 +224,18 @@ func (s *CSVService) sendPredictionRequest(row []string) (*dto.PredictionRespons
 		SelfAbility:          row[13],
 	}
 
-	jsonData, err := json.Marshal(predictionRequest)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+
+	defer cancel()
+
+	resp, err := s.mlClient.Predict(ctx, predictionRequest)
 	if err != nil {
-		return nil, err
-	}
-	resp, err := http.Post(viper.GetString("url"), "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("ML service status --->: %d", resp.StatusCode)
+		return nil, fmt.Errorf("Error while calling ML service: %v", err)
 	}
 
-	var result dto.PredictionResponseDto
-	var resultOfML map[string]interface{}
-	err = json.NewDecoder(resp.Body).Decode(&resultOfML)
-	if err != nil {
-		return nil, errors.New("failed to decode ML service response")
-	}
-
-	result.Direction_name, _ = resultOfML["predicted_track"].(string)
-
-	return &result, nil
+	return &dto.PredictionResponseDto{
+		Direction_name: resp.PredictedTrack,
+	}, nil
 }
 
 func (s *CSVService) equalHeaders(headers, expectedHeaders []string) bool {

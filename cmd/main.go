@@ -1,6 +1,8 @@
 package main
 
 import (
+	pb "github.com/Namdar1Ibrakhim/student-track-system/proto"
+	"google.golang.org/grpc"
 	"os"
 
 	track "github.com/Namdar1Ibrakhim/student-track-system"
@@ -42,8 +44,17 @@ func main() {
 		logrus.Fatalf("failed to initialize db:  %s", err.Error()) //Проверка на инициализацию этого конфига
 	}
 
+	mlAddress := viper.GetString("url")
+	conn, err := grpc.Dial(mlAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		logrus.Fatalf("Error connecting to ML: %s", err.Error())
+	}
+	defer conn.Close()
+
+	mlClient := pb.NewPredictionServiceClient(conn)
+
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	services := service.NewService(repos, mlClient)
 	handlers := handler.NewHandler(services)
 
 	srv := new(track.Server)
