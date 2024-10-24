@@ -18,3 +18,5 @@ How to run app:
 
 Postman Collections: 
 
+How to run with docker:
+* docker-compose up (-d)
