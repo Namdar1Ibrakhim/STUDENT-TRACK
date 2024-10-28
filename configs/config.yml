@@ -1,0 +1,12 @@
+port: "8000"
+host: "localhost"
+
+db:
+  username: "postgres"
+  DB_PASSWORD: "qwerty"
+  host: "host.docker.internal" # host.docker.internal localhost
+  port: "5436"
+  dbname: "postgres"
+  sslmode: "disable"
+
+ml_service_url: "ml_service:5001" # ml_service:5001 localhost:5001

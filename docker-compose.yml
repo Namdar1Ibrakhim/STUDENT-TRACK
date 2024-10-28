@@ -6,8 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: track-backend-service
+    env_file:
+      - .env
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT}:8000"
     depends_on:
       - ml_service
     networks:
@@ -19,11 +21,33 @@ services:
   ml_service:  #указать свой image ml
     image: chotam/ml-service:latest
     container_name: ml-service
+    env_file:
+      - .env
     ports:
-      - "5001:5001"
+      - "${ML_PORT}:5001"
     networks:
       - app-network
+
+  postgres_db:
+    env_file:
+      - .env
+    image: postgres:13
+    container_name: postgres_db
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - app-network
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data: {} # Определение именованного тома для PostgreSQL
