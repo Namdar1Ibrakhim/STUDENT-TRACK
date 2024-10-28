@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Конструктор
 type Handler struct {
 	services *service.Service
 }
@@ -24,7 +23,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			authStudent.POST("/sign-up", h.signUpStudent)
 			authStudent.POST("/sign-in", h.signIn) // один метод для всех полей
 		}
-		instructorRoutes := router.Group("/instructor")
+		instructorRoutes := auth.Group("/instructor")
 		{
 			instructorRoutes.POST("/sign-up", h.signUpInstructor)
 			instructorRoutes.POST("/sign-in", h.signIn)            // один метод для всех полей
@@ -33,7 +32,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		}
 
-		adminRoutes := router.Group("/admin")
+		adminRoutes := auth.Group("/admin")
 		{
 			adminRoutes.POST("/sign-up", h.signUpAdmin)
 			adminRoutes.POST("/sign-in", h.signIn)
@@ -46,7 +45,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	}
 
-	// Пример изменения профиля юзеров по ID и проверяет доступ на админа
 	profile := router.Group("/profile", h.userIdentity)
 	{
 		profile.GET("/get", h.getUser)
@@ -60,13 +58,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		main.POST("/upload-csv", h.UploadCSV)
 		main.POST("/upload-csv/predict", h.PredictCSV)
-		/////////////
-		//Example CSV file
+		/*Example CSV file
+			_____________________________________________________________________________
+			subject1, subject2,.... subject7, Hackathons attended, Topmost Certification, -> continue                  ---|Headers
+			70,       70,           90,       1,                   DBMS Certification,
+			_________________________________________________________________________________________________________
+		  ->Personality, Management or technical, Leadership, Team, Self Ability | IF role == Instructor, + Student_id ---|Headers
+			Extravert,   Management,               NO,         YES,  NO,                                   220202222
 
-		//subjectName,Grade   --- Headers
-		//Math,90             |   data
-		//Physic,70           |
-		//Discrete math,83    |
+		*/
 	}
 
 	course := router.Group("/course", h.userIdentity)

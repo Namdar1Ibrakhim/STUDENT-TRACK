@@ -5,19 +5,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: track-backend
-    env_file:
-      - .env
+    container_name: track-backend-service
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       - ml_service
     networks:
       - app-network
     restart: unless-stopped
+    volumes:
+      - ./configs/config.yml:/root/configs/config.yml
 
   ml_service:  #указать свой image ml
-    image: ml-api
+    image: chotam/ml-service:latest
     container_name: ml-service
     ports:
       - "5001:5001"

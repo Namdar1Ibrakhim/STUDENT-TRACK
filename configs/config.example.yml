@@ -1,10 +1,12 @@
 port:
+host:
 
 db:
+  username:
+  DB_PASSWORD:
   host:
   port:
-  username:
   dbname:
   sslmode:
 
-url:
+ml_service_url:

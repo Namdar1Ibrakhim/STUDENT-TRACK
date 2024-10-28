@@ -1,14 +1,11 @@
 package main
 
 import (
-	"os"
-
 	track "github.com/Namdar1Ibrakhim/student-track-system"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/handler"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/service"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -21,23 +18,22 @@ func main() {
 		logrus.Fatalf("error initializing config: %s", err.Error())
 	}
 
-	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading .env file: %s", err.Error())
-	}
+	viper.AutomaticEnv()
 
 	db, err := repository.NewPostgresDB(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
+		Password: viper.GetString("db.DB_PASSWORD"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 	})
+
 	if err != nil {
 		logrus.Fatalf("Error initializing DB: %s", err.Error())
 	}
 
-	mlAddress := viper.GetString("url")
+	mlAddress := viper.GetString("ml_service_url")
 	grpcClient, err := track.NewGRPCClient(mlAddress) //устанавливает grpc connection, конфиграция
 	if err != nil {
 		logrus.Fatalf("Error connecting to ML: %s", err.Error())
