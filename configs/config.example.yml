@@ -1,12 +1,12 @@
-port:
-host:
+port: "8080"
+host: "localhost"
 
 db:
-  username:
-  DB_PASSWORD:
-  host:
-  port:
-  dbname:
-  sslmode:
+  username: "postgres"
+  DB_PASSWORD: "yourpassword"
+  host: "localhost"
+  port: "5432"
+  dbname: "mydb"
+  sslmode: "enable"
 
-ml_service_url:
+ml_service_url: "localhost:3000"
