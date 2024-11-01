@@ -12,6 +12,19 @@ import (
 
 var validatedFiles sync.Map
 
+func (h *Handler) validateCSV(c *gin.Context, src io.Reader, role int) error {
+	var err error
+	switch role {
+	case constants.RoleInstructor:
+		err = h.services.ValidateCSVForInstructor(src)
+	case constants.RoleStudent:
+		err = h.services.ValidateCSVForStudent(src)
+	default:
+		return constants.ErrAccessDenied
+	}
+	return err
+}
+
 func (h *Handler) UploadCSV(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -26,30 +39,22 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	}
 	defer src.Close()
 
-	userIdFromToken, exists := c.Get("userId")
-	if !exists {
-		newErrorResponse(c, http.StatusUnauthorized, "User Id not found")
+	userID, err := h.GetUserID(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	if h.checkRole(c, constants.RoleInstructor) {
-		err = h.services.ValidateCSVForInstructor(src)
-		if err != nil {
-			newErrorResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-	} else if h.checkRole(c, constants.RoleStudent) {
-		err = h.services.ValidateCSVForStudent(src)
-		if err != nil {
-			newErrorResponse(c, http.StatusBadRequest, err.Error())
-			return
-		}
-	} else {
-		newErrorResponse(c, http.StatusUnauthorized, "User Id not found")
+	role := h.getCurrentRole(c)
+	if err := h.validateCSV(c, src, role); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	src.Seek(0, 0)
+	if _, err := src.Seek(0, 0); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, "Failed to process file")
+		return
+	}
 
 	fileBytes, err := io.ReadAll(src)
 	if err != nil {
@@ -57,7 +62,7 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 		return
 	}
 
-	validatedFiles.Store(userIdFromToken, fileBytes)
+	validatedFiles.Store(userID, fileBytes)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File successfully uploaded and validated",
@@ -65,37 +70,26 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 }
 
 func (h *Handler) PredictCSV(c *gin.Context) {
-	userIdFromToken, exists := c.Get(userCtx)
-	if !exists {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+	userID, err := h.GetUserID(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	fileBytes, exists := validatedFiles.Load(userIdFromToken)
+	fileBytes, exists := validatedFiles.Load(userID)
 	if !exists {
-		newErrorResponse(c, http.StatusBadRequest, "CSV file not found")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrFileNotFound.Error())
 		return
 	}
 
-	src := bytes.NewReader(fileBytes.([]byte))
+	role := h.getCurrentRole(c)
+	isInstructor := role == constants.RoleInstructor
 
 	var predictions map[int]*dto.PredictionResponseDto
-	var err error
 
-	if h.checkRole(c, constants.RoleInstructor) {
-		predictions, err = h.services.PredictCSV(userIdFromToken.(int), src, true)
-		if err != nil {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-	} else if h.checkRole(c, constants.RoleStudent) {
-		predictions, err = h.services.PredictCSV(userIdFromToken.(int), src, false)
-		if err != nil {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-	} else {
-		newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
+	predictions, err = h.services.PredictCSV(userID, bytes.NewReader(fileBytes.([]byte)), isInstructor)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -103,4 +97,14 @@ func (h *Handler) PredictCSV(c *gin.Context) {
 		"message":    "Prediction generated successfully",
 		"prediction": predictions,
 	})
+}
+
+func (h *Handler) getCurrentRole(c *gin.Context) int {
+	if h.checkRole(c, constants.RoleInstructor) {
+		return constants.RoleInstructor
+	}
+	if h.checkRole(c, constants.RoleStudent) {
+		return constants.RoleStudent
+	}
+	return 0
 }

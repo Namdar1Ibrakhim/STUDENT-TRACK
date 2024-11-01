@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/dto"
 	"github.com/Namdar1Ibrakhim/student-track-system/pkg/repository"
 	pb "github.com/Namdar1Ibrakhim/student-track-system/proto"
@@ -12,11 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
-
-var (
-	ErrInvalidCSVStructure = errors.New("invalid CSV structure")
-	ErrMLServiceFailure    = errors.New("ML service prediction failed")
 )
 
 type CSVService struct {
@@ -84,11 +80,11 @@ func (s *CSVService) validateCSV(file io.Reader, config csvConfig) error {
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil || len(records) == 0 {
-		return fmt.Errorf("%w: failed to read CSV file", ErrInvalidCSVStructure)
+		return fmt.Errorf("%w: failed to read CSV file", constants.ErrInvalidCSVStructure)
 	}
 
 	if !s.equalHeaders(records[0], config.headers) {
-		return fmt.Errorf("%w: invalid headers", ErrInvalidCSVStructure)
+		return fmt.Errorf("%w: invalid headers", constants.ErrInvalidCSVStructure)
 	}
 
 	return s.validateRows(records[1:], config)
@@ -219,7 +215,7 @@ func (s *CSVService) makePrediction(row []string) (*dto.PredictionResponseDto, e
 	req := createPredictionRequest(row)
 	resp, err := s.mlClient.Predict(ctx, req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrMLServiceFailure, err)
+		return nil, fmt.Errorf("%w: %v", constants.ErrMLServiceFailure, err)
 	}
 
 	return &dto.PredictionResponseDto{

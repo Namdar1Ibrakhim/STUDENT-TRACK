@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/Namdar1Ibrakhim/student-track-system/pkg/constants"
 	"net/http"
 	"strings"
 
@@ -10,50 +11,49 @@ import (
 const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
+	bearerSchema        = "Bearer"
 )
 
-func (h *Handler) userIdentity(c *gin.Context) {
+func extractTokenFromHeader(c *gin.Context) (string, error) {
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
-		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
-		return
+		return "", constants.ErrEmptyAuthHeader
 	}
 
 	headerParts := strings.Split(header, " ")
-
-	if len(headerParts) != 2 {
-		newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
-		return
+	if len(headerParts) != 2 || !strings.EqualFold(headerParts[0], bearerSchema) {
+		return "", constants.ErrInvalidAuthHeader
 	}
 
-	userId, err := h.services.Authorization.ParseToken(headerParts[1])
+	return headerParts[1], nil
+}
+
+func (h *Handler) userIdentity(c *gin.Context) {
+	token, err := extractTokenFromHeader(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+	}
+
+	userId, err := h.services.Authorization.ParseToken(token)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	c.Set(userCtx, userId)
+	c.Next()
 }
 
 func (h *Handler) checkRole(c *gin.Context, requiredRole int) bool {
-	header := c.GetHeader(authorizationHeader)
-	if header == "" {
-		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
-		c.Abort()
-		return false
-	}
-
-	headerParts := strings.Split(header, " ")
-	if len(headerParts) != 2 {
-		newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
-		c.Abort()
-		return false
-	}
-
-	userId, err := h.services.Authorization.ParseToken(headerParts[1])
+	token, err := extractTokenFromHeader(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
-		c.Abort()
+		return false
+	}
+
+	userId, err := h.services.Authorization.ParseToken(token)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return false
 	}
 
@@ -77,4 +77,12 @@ func (h *Handler) checkRole(c *gin.Context, requiredRole int) bool {
 	c.Set(userCtx, userId)
 	c.Next()
 	return true
+}
+
+func (h *Handler) GetUserID(c *gin.Context) (int, error) {
+	userID, exists := c.Get(userCtx)
+	if !exists {
+		return 0, constants.ErrUserNotFound
+	}
+	return userID.(int), nil
 }
