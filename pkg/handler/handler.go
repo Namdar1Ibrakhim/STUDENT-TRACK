@@ -16,89 +16,89 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	auth := router.Group("/auth")
-	{
-		authStudent := auth.Group("/student")
-		{
-			authStudent.POST("/sign-up", h.signUpStudent)
-			authStudent.POST("/sign-in", h.signIn) // один метод для всех полей
-		}
-		instructorRoutes := auth.Group("/instructor")
-		{
-			instructorRoutes.POST("/sign-up", h.signUpInstructor)
-			instructorRoutes.POST("/sign-in", h.signIn)            // один метод для всех полей
-			instructorRoutes.GET("/student/:id", h.getStudentById) // получение студента по айди
-			instructorRoutes.GET("/get", h.getUser)
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 
+	v1 := router.Group("/api/v1")
+	{
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/sign-in", h.signIn) // Единый эндпоинт входа
+
+			auth.POST("/sign-up/student", h.signUpStudent)
+			auth.POST("/sign-up/instructor", h.signUpInstructor)
+			auth.POST("/sign-up/admin", h.signUpAdmin)
 		}
 
-		adminRoutes := auth.Group("/admin")
+		protected := v1.Group("")
+		protected.Use(h.userIdentity)
 		{
-			adminRoutes.POST("/sign-up", h.signUpAdmin)
-			adminRoutes.POST("/sign-in", h.signIn)
-			adminRoutes.GET("/get", h.getUser)
-			adminRoutes.GET("/user/:id", h.getUserById)                            // получение пользователя по айди
-			adminRoutes.GET("/editPassword/:id/:password", h.editPasswordByUserId) //изменить пароль может только админ для всех пользователей
-			adminRoutes.DELETE("/users/:id", h.DeleteUser)                         //удаление акк через админ и юзер
+			profile := protected.Group("/profile")
+			{
+				profile.GET("", h.getUser)
+				profile.PUT("/:id", h.UpdateUser)
+				profile.DELETE("/:id", h.DeleteUser)
+				//profile.GET("/password/:password", h.editPasswordByCurrentUserId) // Обновление пароля
+			}
 
+			admin := protected.Group("/admin")
+			{
+				admin.GET("/users", h.getUser)
+				admin.GET("/users/:id", h.getUserById)
+				admin.DELETE("/users/:id", h.DeleteUser)
+				admin.PATCH("/users/:id/password", h.editPasswordByCurrentUserId)
+			}
+
+			instructor := protected.Group("/instructor")
+			{
+				instructor.GET("/students/:id", h.getStudentById)
+			}
+			predict := protected.Group("/predict")
+			{
+				predict.POST("/upload", h.UploadCSV)
+				predict.POST("/analyze", h.PredictCSV)
+				/*Example CSV file
+					_____________________________________________________________________________
+					subject1, subject2,.... subject7, Hackathons attended, Topmost Certification, -> continue                  ---|Headers
+					70,       70,           90,       1,                   DBMS Certification,
+					_________________________________________________________________________________________________________
+				  ->Personality, Management or technical, Leadership, Team, Self Ability | IF role == Instructor, + Student_id ---|Headers
+					Extravert,   Management,               NO,         YES,  NO,                                   220202222
+
+				*/
+			}
+
+			courses := protected.Group("/courses")
+			{
+				courses.GET("", h.getAllCourse)
+				courses.GET("/:id", h.getCourseById)
+				courses.GET("/search", h.getCourseByName)
+			}
+
+			directions := protected.Group("/directions")
+			{
+				directions.GET("", h.getAllDirection)
+				directions.GET("/:id", h.getDirectionById)
+				directions.GET("/search", h.getDirectionByName)
+			}
+
+			predictions := protected.Group("/predictions")
+			{
+				predictions.GET("", h.getAllPrediction)
+				predictions.GET("/:id", h.getPredictionById)
+				predictions.GET("/student/:studentId", h.getPredictionByStudentId)
+				predictions.GET("/direction/:directionId", h.getPredictionByDirectionId)
+			}
+
+			studentCourses := protected.Group("/student-courses")
+			{
+				studentCourses.GET("", h.getAllStudentCourse)
+				studentCourses.GET("/:id", h.getStudentCourseById)
+				studentCourses.GET("/student/:studentId", h.getStudentCourseByStudentId)
+				studentCourses.GET("/course/:courseId", h.getStudentCourseByCourseId)
+				studentCourses.GET("/filter", h.getAllStudentCourseByFilter)
+			}
 		}
-
-	}
-
-	profile := router.Group("/profile", h.userIdentity)
-	{
-		profile.GET("/get", h.getUser)
-		profile.PUT("/users/:id", h.UpdateUser)
-		profile.DELETE("/users/:id", h.DeleteUser) //удаление акк через админ и юзер
-		profile.GET("/editPassword/:password", h.editPasswordByCurrentUserId)
-
-	}
-
-	main := router.Group("/main", h.userIdentity)
-	{
-		main.POST("/upload-csv", h.UploadCSV)
-		main.POST("/upload-csv/predict", h.PredictCSV)
-		/*Example CSV file
-			_____________________________________________________________________________
-			subject1, subject2,.... subject7, Hackathons attended, Topmost Certification, -> continue                  ---|Headers
-			70,       70,           90,       1,                   DBMS Certification,
-			_________________________________________________________________________________________________________
-		  ->Personality, Management or technical, Leadership, Team, Self Ability | IF role == Instructor, + Student_id ---|Headers
-			Extravert,   Management,               NO,         YES,  NO,                                   220202222
-
-		*/
-	}
-
-	course := router.Group("/course", h.userIdentity)
-	{
-		course.GET("/getAll", h.getAllCourse)
-		course.GET("/getById/:id", h.getCourseById)
-		course.GET("/getByName/:name", h.getCourseByName)
-	}
-
-	direction := router.Group("/direction", h.userIdentity)
-	{
-		direction.GET("/getAll", h.getAllDirection)
-		direction.GET("/getById/:id", h.getDirectionById)
-		direction.GET("/getByName/:name", h.getDirectionByName)
-	}
-
-	prediction := router.Group("/prediction", h.userIdentity)
-	{
-		prediction.GET("/getAll", h.getAllPrediction)
-		prediction.GET("/getById/:id", h.getPredictionById)
-		prediction.GET("/getByStudentId/:studentId", h.getPredictionByStudentId)
-		prediction.GET("/getByDirectionId/:directionId", h.getPredictionByDirectionId)
-	}
-
-	student_course := router.Group("/studentCourse", h.userIdentity)
-	{
-		student_course.GET("/getAll", h.getAllStudentCourse)
-		student_course.GET("/getById/:id", h.getStudentCourseById)
-		student_course.GET("/getByStudentId/:studentId", h.getStudentCourseByStudentId)
-		student_course.GET("/getByCourseId/:courseId", h.getStudentCourseByCourseId)
-		student_course.GET("/getByFilter", h.getAllStudentCourseByFilter)
-
 	}
 
 	return router

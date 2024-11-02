@@ -21,8 +21,8 @@ func NewPredictionService(repo repository.Predictions) *PredictionService {
 // 		sortByGrades = &sortBy
 // 	}
 
-// 	return s.repo.GetAllPredictionByFilter(page, pageSize, sortByGrades)
-// }
+//		return s.repo.GetAllPredictionByFilter(page, pageSize, sortByGrades)
+//	}
 func (s *PredictionService) GetAllPrediction() ([]dto.PredictionResponse, error) {
 	return s.repo.GetAllPrediction()
 }
@@ -41,7 +41,3 @@ func (s *PredictionService) GetPredictionByStudentId(studentId int) (dto.Predict
 func (s *PredictionService) GetPredictionByDirectionId(directionId int) (dto.PredictionResponse, error) {
 	return s.repo.GetPredictionByDirectionId(directionId)
 }
-
-
-
-

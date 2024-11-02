@@ -54,7 +54,7 @@ type Prediction interface {
 	GetPredictionById(studentCourseId int) (dto.PredictionResponse, error)
 	GetPredictionByStudentId(studentId int) (dto.PredictionResponse, error)
 	GetPredictionByDirectionId(directionId int) (dto.PredictionResponse, error)
-	GetAllPredictionByFilter(pageSize int, page int, sortByGrades string) ([]dto.PredictionResponse, error)
+	//GetAllPredictionByFilter(pageSize int, page int, sortByGrades string) ([]dto.PredictionResponse, error)
 }
 
 type Service struct {
@@ -73,5 +73,6 @@ func NewService(repos *repository.Repository, mlClient pb.PredictionServiceClien
 		Course:        NewCourseService(repos.Course),
 		Direction:     NewDirectionService(repos.Direction),
 		StudentCourse: NewStudentCourseService(repos.StudentCourse),
+		Prediction:    NewPredictionService(repos.Predictions),
 	}
 }
