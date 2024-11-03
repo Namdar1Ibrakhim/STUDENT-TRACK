@@ -17,7 +17,7 @@ How to run app:
 * go run cmd/main.go
 
 Postman Collections: 
-
+* https://drive.google.com/file/d/1cev7iMaen9ldNqFdnlRxxorRyX_Jn0FH/view?usp=drive_link
 
 How to run with docker:
 * docker-compose up (-d)
