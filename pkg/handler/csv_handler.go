@@ -39,7 +39,7 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	}
 	defer src.Close()
 
-	userID, err := h.GetUserID(c)
+	userID, err := h.GetUserIDFromContext(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
@@ -70,7 +70,7 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 }
 
 func (h *Handler) PredictCSV(c *gin.Context) {
-	userID, err := h.GetUserID(c)
+	userID, err := h.GetUserIDFromContext(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return

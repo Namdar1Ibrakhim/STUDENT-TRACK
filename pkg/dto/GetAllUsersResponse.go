@@ -1,7 +1,7 @@
 package dto
 
-type UserResponse struct {
-	Id            int    `json:"-" db:"id"`
+type GetAllUsersResponse struct {
+	Id            int    `json:"id"`
 	Firstname     string `json:"firstname" binding:"required"`
 	Lastname      string `json:"lastname" binding:"required"`
 	Username      string `json:"username" binding:"required"`

@@ -45,6 +45,16 @@ func (r *AuthPostgres) GetUser(username, password string) (track.User, error) {
 	return user, err
 }
 
+func (r *AuthPostgres) GetAllUsers() ([]dto.GetAllUsersResponse, error) {
+	var users []dto.GetAllUsersResponse
+	query := fmt.Sprintf("SELECT id, firstname, lastname, username, role FROM %s", usersTable)
+	err := r.db.Select(&users, query)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (r *AuthPostgres) FindByID(userId int) (dto.UserResponse, error) {
 	var user dto.UserResponse
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", usersTable)
@@ -63,6 +73,13 @@ func (r *AuthPostgres) DeleteUser(userId int) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id=$1", usersTable)
 	_, err := r.db.Exec(query, userId)
 	return err
+}
+
+func (r *AuthPostgres) GetPasswordHashById(userId int) (dto.GetPasswordRequest, error) {
+	var user dto.GetPasswordRequest
+	query := fmt.Sprintf("SELECT id, password_hash FROM %s WHERE id=$1", usersTable)
+	err := r.db.Get(&user, query, userId)
+	return user, err
 }
 
 func (r *AuthPostgres) EditPassword(userId int, password string) error {

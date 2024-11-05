@@ -28,12 +28,9 @@ type AuthService struct {
 	repo repository.Authorization
 }
 
-// Constructor
 func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
-
-//
 
 func (s *AuthService) CreateUser(user track.User, role constants.Role) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
@@ -95,6 +92,14 @@ func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
 	return user, nil
 }
 
+func (s *AuthService) GetAllUsers() ([]dto.GetAllUsersResponse, error) {
+	users, err := s.repo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (s *AuthService) UpdateUser(userId int, input dto.UpdateUser) error {
 	return s.repo.UpdateUser(userId, input)
 }
@@ -103,8 +108,18 @@ func (s *AuthService) DeleteUser(userId int) error {
 	return s.repo.DeleteUser(userId)
 }
 
-func (s *AuthService) EditPassword(userId int, password string) error {
-	password = generatePasswordHash(password)
-	return s.repo.EditPassword(userId, password)
-}
+func (s *AuthService) EditPassword(userId int, oldPassword, newPassword string, isAdmin bool) error {
+	if !isAdmin {
+		currentUser, err := s.repo.GetPasswordHashById(userId)
+		if err != nil {
+			return fmt.Errorf("user not found")
+		}
 
+		if currentUser.Password_hash != generatePasswordHash(oldPassword) {
+			return fmt.Errorf("incorrect old password")
+		}
+	}
+
+	newPasswordHash := generatePasswordHash(newPassword)
+	return s.repo.EditPassword(userId, newPasswordHash)
+}

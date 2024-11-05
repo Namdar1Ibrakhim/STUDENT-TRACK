@@ -11,16 +11,18 @@ import (
 type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
 	GetUser(username, password string) (track.User, error)
+	GetAllUsers() ([]dto.GetAllUsersResponse, error)
 	FindByID(userId int) (dto.UserResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error
-	EditPassword(userId int, password string) error
+	GetPasswordHashById(userId int) (dto.GetPasswordRequest, error)
+	EditPassword(userId int, newPasswordHash string) error
 }
 
 type Predictions interface {
 	SavePrediction(studentId int, directionId int) error
 	GetAllPrediction() ([]dto.PredictionResponse, error)
-	GetPredictionById(id int)(dto.PredictionResponse, error)
+	GetPredictionById(id int) (dto.PredictionResponse, error)
 	GetPredictionByStudentId(studentId int) (dto.PredictionResponse, error)
 	GetPredictionByDirectionId(directionId int) (dto.PredictionResponse, error)
 	GetPredictionByDateRange(studentId int, startDate, endDate string) ([]dto.PredictionResponse, error)
@@ -48,7 +50,7 @@ type StudentCourse interface {
 	AddStudentCourse(student_id int, course_id int, grades int) error
 }
 
-// type Prediction 
+// type Prediction
 
 type Repository struct {
 	Authorization

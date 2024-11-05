@@ -44,6 +44,20 @@ func (h *Handler) userIdentity(c *gin.Context) {
 	c.Next()
 }
 
+func (h *Handler) getUserIdentity(c *gin.Context) int {
+	token, err := extractTokenFromHeader(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+	}
+
+	userId, err := h.services.Authorization.ParseToken(token)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return 0
+	}
+	return userId
+}
+
 func (h *Handler) checkRole(c *gin.Context, requiredRole int) bool {
 	token, err := extractTokenFromHeader(c)
 	if err != nil {
@@ -79,7 +93,7 @@ func (h *Handler) checkRole(c *gin.Context, requiredRole int) bool {
 	return true
 }
 
-func (h *Handler) GetUserID(c *gin.Context) (int, error) {
+func (h *Handler) GetUserIDFromContext(c *gin.Context) (int, error) {
 	userID, exists := c.Get(userCtx)
 	if !exists {
 		return 0, constants.ErrUserNotFound

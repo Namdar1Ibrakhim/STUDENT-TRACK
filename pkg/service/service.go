@@ -17,9 +17,10 @@ type Authorization interface {
 	//то что принимаем      //то что возвращаем
 	ParseToken(token string) (int, error)
 	GetUser(userId int) (dto.UserResponse, error)
+	GetAllUsers() ([]dto.GetAllUsersResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error
-	EditPassword(userId int, password string) error
+	EditPassword(userId int, oldPassword, newPassword string, isAdmin bool) error
 }
 
 type CSV interface {

@@ -36,17 +36,18 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			profile := protected.Group("/profile")
 			{
 				profile.GET("", h.getUser)
-				profile.PUT("/:id", h.UpdateUser)
-				profile.DELETE("/:id", h.DeleteUser)
-				//profile.GET("/password/:password", h.editPasswordByCurrentUserId) // Обновление пароля
+				profile.PUT("", h.UpdateUser)
+				profile.DELETE("", h.DeleteUser)
+				profile.PATCH("/password", h.editPasswordByUser)
 			}
 
 			admin := protected.Group("/admin")
 			{
-				admin.GET("/users", h.getUser)
+				admin.GET("/users", h.getAllUsers)
 				admin.GET("/users/:id", h.getUserById)
+				admin.PUT("/users/:id", h.UpdateUser)
 				admin.DELETE("/users/:id", h.DeleteUser)
-				admin.PATCH("/users/:id/password", h.editPasswordByCurrentUserId)
+				admin.PATCH("/users/:id/password", h.editPasswordByAdmin)
 			}
 
 			instructor := protected.Group("/instructor")
