@@ -14,13 +14,13 @@ import (
 type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
 	GenerateToken(username, password string) (string, error)
-	//то что принимаем      //то что возвращаем
 	ParseToken(token string) (int, error)
 	GetUser(userId int) (dto.UserResponse, error)
 	GetAllUsers() ([]dto.GetAllUsersResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error
 	EditPassword(userId int, oldPassword, newPassword string, isAdmin bool) error
+	GetStudents() ([]dto.StudentsResponse, error)
 }
 
 type CSV interface {

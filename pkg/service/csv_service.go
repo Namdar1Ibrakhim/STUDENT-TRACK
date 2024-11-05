@@ -147,7 +147,7 @@ func (s *CSVService) PredictCSV(studentId int, file io.Reader, isInstructor bool
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		return nil, errors.New("invalid CSV structure")
+		return nil, errors.New(constants.ErrInvalidCSVStructure.Error())
 	}
 
 	if isInstructor {

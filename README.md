@@ -17,7 +17,12 @@ How to run app:
 * go run cmd/main.go
 
 Postman Collections: 
-* https://drive.google.com/file/d/1cev7iMaen9ldNqFdnlRxxorRyX_Jn0FH/view?usp=drive_link
+### Importing the Postman Collection
+1. Download the [Postman Collection](./postman_collection.json) file.
+2. Open Postman and go to **File > Import**.
+3. Select the `postman_collection.json` file to import the collection.
+OR
+* google-drive: https://drive.google.com/file/d/1SJhDRBaYGG-BLm-KWjY9iXm0zu9fYZP1/view?usp=sharing
 
 How to run with docker:
 * docker-compose up (-d)

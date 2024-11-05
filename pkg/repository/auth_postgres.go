@@ -55,6 +55,13 @@ func (r *AuthPostgres) GetAllUsers() ([]dto.GetAllUsersResponse, error) {
 	return users, nil
 }
 
+func (r *AuthPostgres) GetStudents() ([]dto.StudentsResponse, error) {
+	var students []dto.StudentsResponse
+	query := fmt.Sprintf("SELECT id, firstname, lastname FROM %s WHERE role = 1", usersTable)
+	err := r.db.Select(&students, query)
+	return students, err
+}
+
 func (r *AuthPostgres) FindByID(userId int) (dto.UserResponse, error) {
 	var user dto.UserResponse
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", usersTable)

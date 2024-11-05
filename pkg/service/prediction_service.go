@@ -15,14 +15,15 @@ func NewPredictionService(repo repository.Predictions) *PredictionService {
 }
 
 // Получение всех курсов с пагинацией и опциональной сортировкой по оценкам
-// func (s *PredictionService) GetAllPredictionByFilter(page, pageSize int, sortBy string) ([]dto.PredictionResponse, error) {
-// 	var sortByGrades *string
-// 	if sortBy == "asc" || sortBy == "desc" {
-// 		sortByGrades = &sortBy
-// 	}
-
-//		return s.repo.GetAllPredictionByFilter(page, pageSize, sortByGrades)
+//func (s *PredictionService) GetAllPredictionByFilter(page, pageSize int, sortBy string) ([]dto.PredictionResponse, error) {
+//	var sortByGrades *string
+//	if sortBy == "asc" || sortBy == "desc" {
+//		sortByGrades = &sortBy
 //	}
+//
+//	return s.repo.GetAllPredictionByFilter(page, pageSize, sortByGrades)
+//}
+
 func (s *PredictionService) GetAllPrediction() ([]dto.PredictionResponse, error) {
 	return s.repo.GetAllPrediction()
 }

@@ -65,7 +65,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, errors.New(constants.ErrInvalidSigningMethod.Error())
 		}
 
 		return []byte(signingKey), nil
@@ -92,6 +92,10 @@ func (s *AuthService) GetUser(userId int) (dto.UserResponse, error) {
 	return user, nil
 }
 
+func (s *AuthService) GetStudents() ([]dto.StudentsResponse, error) {
+	return s.repo.GetStudents()
+}
+
 func (s *AuthService) GetAllUsers() ([]dto.GetAllUsersResponse, error) {
 	users, err := s.repo.GetAllUsers()
 	if err != nil {
@@ -112,11 +116,11 @@ func (s *AuthService) EditPassword(userId int, oldPassword, newPassword string, 
 	if !isAdmin {
 		currentUser, err := s.repo.GetPasswordHashById(userId)
 		if err != nil {
-			return fmt.Errorf("user not found")
+			return fmt.Errorf(constants.ErrUserNotFound.Error())
 		}
 
 		if currentUser.Password_hash != generatePasswordHash(oldPassword) {
-			return fmt.Errorf("incorrect old password")
+			return fmt.Errorf(constants.ErrIncorrectOldPassword.Error())
 		}
 	}
 

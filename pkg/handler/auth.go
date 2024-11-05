@@ -115,7 +115,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 	}
 
 	if !h.checkRole(c, constants.RoleAdmin) {
-		newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
+		newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
 		return
 	}
 
@@ -134,14 +134,14 @@ func (h *Handler) getStudentById(c *gin.Context) {
 
 	h.checkRole(c, constants.RoleInstructor)
 	if c.IsAborted() {
-		newErrorResponse(c, http.StatusForbidden, "you don't have access to this resource")
+		newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
 		return
 	}
 
 	userId := c.Param("id")
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid student ID")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidStudentId.Error())
 		return
 	}
 	user, err := h.services.GetUser(id)
@@ -150,7 +150,7 @@ func (h *Handler) getStudentById(c *gin.Context) {
 		return
 	}
 	if user.Role != constants.RoleStudent {
-		newErrorResponse(c, http.StatusUnauthorized, "Student not found with this id")
+		newErrorResponse(c, http.StatusUnauthorized, constants.ErrStudentNotFound.Error())
 		return
 	}
 
@@ -159,12 +159,31 @@ func (h *Handler) getStudentById(c *gin.Context) {
 	})
 }
 
+func (h *Handler) getStudents(c *gin.Context) {
+	if h.checkRole(c, constants.RoleInstructor) {
+		if c.IsAborted() {
+			newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
+			return
+		}
+	}
+
+	students, err := h.services.GetStudents()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"students": students,
+	})
+}
+
 func (h *Handler) getUserById(c *gin.Context) {
 
 	userId := c.Param("id")
 	id, err := strconv.Atoi(userId)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid student ID")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidStudentId.Error())
 		return
 	}
 	user, err := h.services.GetUser(id)
@@ -185,7 +204,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		var err error
 		userIdFromPath, err = strconv.Atoi(idParam)
 		if err != nil {
-			newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+			newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidUserId.Error())
 			return
 		}
 	}
@@ -198,14 +217,14 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 
 	var input dto.UpdateUser
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid input data")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidInputData.Error())
 		return
 	}
 
 	if idParam == "" || userIdFromContext == userIdFromPath {
 		existingUser, err := h.services.GetUser(userIdFromContext)
 		if err != nil {
-			newErrorResponse(c, http.StatusNotFound, "User not found")
+			newErrorResponse(c, http.StatusNotFound, constants.ErrUserNotFound.Error())
 			return
 		}
 
@@ -220,13 +239,13 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	} else {
 		h.checkRole(c, constants.RoleAdmin)
 		if c.IsAborted() {
-			newErrorResponse(c, http.StatusForbidden, "You don't have access to this resource")
+			newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
 			return
 		}
 
 		existingUser, err := h.services.GetUser(userIdFromPath)
 		if err != nil {
-			newErrorResponse(c, http.StatusNotFound, "User not found")
+			newErrorResponse(c, http.StatusNotFound, constants.ErrUserNotFound.Error())
 			return
 		}
 
@@ -248,7 +267,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		var err error
 		userIdFromPath, err = strconv.Atoi(idParam)
 		if err != nil {
-			newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+			newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidUserId.Error())
 			return
 		}
 	}
@@ -262,7 +281,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	if idParam == "" || userIdFromContext == userIdFromPath {
 		existingUser, err := h.services.GetUser(userIdFromContext)
 		if err != nil {
-			newErrorResponse(c, http.StatusNotFound, "User not found")
+			newErrorResponse(c, http.StatusNotFound, constants.ErrUserNotFound.Error())
 			return
 		}
 
@@ -277,13 +296,13 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	} else {
 		h.checkRole(c, constants.RoleAdmin)
 		if c.IsAborted() {
-			newErrorResponse(c, http.StatusForbidden, "You don't have access to this resource")
+			newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
 			return
 		}
 
 		existingUser, err := h.services.GetUser(userIdFromPath)
 		if err != nil {
-			newErrorResponse(c, http.StatusNotFound, "User not found")
+			newErrorResponse(c, http.StatusNotFound, constants.ErrUserNotFound.Error())
 			return
 		}
 
@@ -300,20 +319,20 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 
 func (h *Handler) editPasswordByAdmin(c *gin.Context) {
 	if !h.checkRole(c, constants.RoleAdmin) {
-		newErrorResponse(c, http.StatusForbidden, "You don't have access to this resource")
+		newErrorResponse(c, http.StatusForbidden, constants.ErrAccessDenied.Error())
 		return
 	}
 
 	idParam := c.Param("id")
 	userId, err := strconv.Atoi(idParam)
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidUserId.Error())
 		return
 	}
 
 	var input dto.EditPasswordAdminRequest
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid input data")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidInputData.Error())
 		return
 	}
 
@@ -336,7 +355,7 @@ func (h *Handler) editPasswordByUser(c *gin.Context) {
 
 	var input dto.EditPasswordUserRequest
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Invalid input data")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrInvalidInputData.Error())
 		return
 	}
 

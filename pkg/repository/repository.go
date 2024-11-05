@@ -12,6 +12,7 @@ type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
 	GetUser(username, password string) (track.User, error)
 	GetAllUsers() ([]dto.GetAllUsersResponse, error)
+	GetStudents() ([]dto.StudentsResponse, error)
 	FindByID(userId int) (dto.UserResponse, error)
 	UpdateUser(userId int, input dto.UpdateUser) error
 	DeleteUser(userId int) error

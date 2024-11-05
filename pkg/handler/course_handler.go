@@ -41,18 +41,17 @@ func (h *Handler) getCourseById(c *gin.Context) {
 }
 
 func (h *Handler) getCourseByName(c *gin.Context) {
-	courseName := c.Query("name") // Получаем имя курса из параметров маршрута
+	courseName := c.Query("name")
 	if courseName == "" {
 		newErrorResponse(c, http.StatusBadRequest, "name parameter is required")
 		return
 	}
 
-	course, err := h.services.Course.GetCourseByName(courseName) // Вызов метода GetByName из сервиса
+	course, err := h.services.Course.GetCourseByName(courseName)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// Возвращаем статус 200 и курс в формате JSON
 	c.JSON(http.StatusOK, course)
 }

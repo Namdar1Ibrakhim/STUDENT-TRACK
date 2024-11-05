@@ -52,6 +52,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 			instructor := protected.Group("/instructor")
 			{
+				instructor.GET("/students", h.getStudents)
 				instructor.GET("/students/:id", h.getStudentById)
 			}
 			predict := protected.Group("/predict")

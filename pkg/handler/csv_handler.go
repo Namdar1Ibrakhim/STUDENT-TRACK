@@ -28,13 +28,13 @@ func (h *Handler) validateCSV(c *gin.Context, src io.Reader, role int) error {
 func (h *Handler) UploadCSV(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Failed to upload file")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrFailedToUploadFile.Error())
 		return
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "Failed to open file")
+		newErrorResponse(c, http.StatusBadRequest, constants.ErrFailedToOpenFile.Error())
 		return
 	}
 	defer src.Close()
@@ -52,13 +52,13 @@ func (h *Handler) UploadCSV(c *gin.Context) {
 	}
 
 	if _, err := src.Seek(0, 0); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "Failed to process file")
+		newErrorResponse(c, http.StatusInternalServerError, constants.ErrFailedToProcessFile.Error())
 		return
 	}
 
 	fileBytes, err := io.ReadAll(src)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "Failed to read file content")
+		newErrorResponse(c, http.StatusInternalServerError, constants.ErrFailedToReadFile.Error())
 		return
 	}
 
