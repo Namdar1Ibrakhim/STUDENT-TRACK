@@ -44,6 +44,10 @@ func main() {
 	services := service.NewService(repos, grpcClient.Client)
 	handlers := handler.NewHandler(services)
 
+	// Создаем маршрутизатор Gin с CORS middleware
+	router := gin.New()
+	router.Use(CORSMiddleware()) // Добавляем middleware
+
 	server := new(track.Server)
 	if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
@@ -61,7 +65,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
