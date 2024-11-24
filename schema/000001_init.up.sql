@@ -3,7 +3,7 @@ CREATE TABLE users
     id            serial       primary key ,
     firstname     varchar(255) NOT NULL,
     lastname      varchar(255) NOT NULL,
-    username      varchar(255) NOT NULL UNIQUE,
+    email         varchar(255) NOT NULL UNIQUE,
     password_hash varchar(255) NOT NULL,
     role          INT          NOT NULL,
     CHECK ( role >= 1 and role <=3 )

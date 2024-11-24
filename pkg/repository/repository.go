@@ -10,7 +10,7 @@ import (
 // Все репозиторные интерфейсы пишем здесь
 type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
-	GetUser(username, password string) (track.User, error)
+	GetUser(email, password string) (track.User, error)
 	GetAllUsers() ([]dto.GetAllUsersResponse, error)
 	GetStudents() ([]dto.StudentsResponse, error)
 	FindByID(userId int) (dto.UserResponse, error)

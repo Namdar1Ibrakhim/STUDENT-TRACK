@@ -21,15 +21,15 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 func (r *AuthPostgres) CreateUser(user track.User, role constants.Role) (int, error) {
 	var id int
 
-	checkQuery := fmt.Sprintf("SELECT id FROM %s WHERE username=$1", usersTable)
-	err := r.db.QueryRow(checkQuery, user.Username).Scan(&id)
+	checkQuery := fmt.Sprintf("SELECT id FROM %s WHERE email=$1", usersTable)
+	err := r.db.QueryRow(checkQuery, user.Email).Scan(&id)
 	if err == nil {
-		return 0, fmt.Errorf("user with username %s already exists", user.Username)
+		return 0, fmt.Errorf("user with email %s already exists", user.Email)
 	}
 
-	insertQuery := fmt.Sprintf("INSERT INTO %s (firstname, lastname, username, password_hash, role) values ($1, $2, $3, $4, $5) RETURNING id", usersTable)
+	insertQuery := fmt.Sprintf("INSERT INTO %s (firstname, lastname, email, password_hash, role) values ($1, $2, $3, $4, $5) RETURNING id", usersTable)
 
-	row := r.db.QueryRow(insertQuery, user.Firstname, user.Lastname, user.Username, user.Password, role)
+	row := r.db.QueryRow(insertQuery, user.Firstname, user.Lastname, user.Email, user.Password, role)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -37,17 +37,17 @@ func (r *AuthPostgres) CreateUser(user track.User, role constants.Role) (int, er
 	return id, nil
 }
 
-func (r *AuthPostgres) GetUser(username, password string) (track.User, error) {
+func (r *AuthPostgres) GetUser(email, password string) (track.User, error) {
 	var user track.User
-	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
-	err := r.db.Get(&user, query, username, password)
+	query := fmt.Sprintf("SELECT id FROM %s WHERE email=$1 AND password_hash=$2", usersTable)
+	err := r.db.Get(&user, query, email, password)
 
 	return user, err
 }
 
 func (r *AuthPostgres) GetAllUsers() ([]dto.GetAllUsersResponse, error) {
 	var users []dto.GetAllUsersResponse
-	query := fmt.Sprintf("SELECT id, firstname, lastname, username, role FROM %s", usersTable)
+	query := fmt.Sprintf("SELECT id, firstname, lastname, email, role FROM %s", usersTable)
 	err := r.db.Select(&users, query)
 	if err != nil {
 		return nil, err
@@ -71,8 +71,8 @@ func (r *AuthPostgres) FindByID(userId int) (dto.UserResponse, error) {
 }
 
 func (r *AuthPostgres) UpdateUser(userId int, input dto.UpdateUser) error {
-	query := fmt.Sprintf("UPDATE %s SET firstname=$1, lastname=$2, username=$3 WHERE id=$4", usersTable)
-	_, err := r.db.Exec(query, input.Firstname, input.Lastname, input.Username, userId)
+	query := fmt.Sprintf("UPDATE %s SET firstname=$1, lastname=$2, email=$3 WHERE id=$4", usersTable)
+	_, err := r.db.Exec(query, input.Firstname, input.Lastname, input.Email, userId)
 	return err
 }
 

@@ -13,7 +13,7 @@ import (
 // Все сервисные интерфейсы пишем здесь
 type Authorization interface {
 	CreateUser(user track.User, role constants.Role) (int, error)
-	GenerateToken(username, password string) (string, error)
+	GenerateToken(email, password string) (string, error)
 	ParseToken(token string) (int, error)
 	GetUser(userId int) (dto.UserResponse, error)
 	GetAllUsers() ([]dto.GetAllUsersResponse, error)

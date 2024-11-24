@@ -4,6 +4,6 @@ type User struct { // структура пользователя для рег�
 	Id        int    `json:"-" db:"id"`                    // ID не передается в JSON
 	Firstname string `json:"firstname" binding:"required"` // Имя
 	Lastname  string `json:"lastname" binding:"required"`  // Имя
-	Username  string `json:"username" binding:"required"`  // Имя пользователя
+	Email     string `json:"email" binding:"required"`  // Имя пользователя
 	Password  string `json:"password" binding:"required"`  // Пароль
 }
