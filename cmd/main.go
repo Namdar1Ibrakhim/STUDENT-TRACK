@@ -44,10 +44,6 @@ func main() {
 	services := service.NewService(repos, grpcClient.Client)
 	handlers := handler.NewHandler(services)
 
-	// Создаем маршрутизатор Gin с CORS middleware
-	router := gin.New()
-	router.Use(CORSMiddleware()) // Добавляем middleware
-
 	server := new(track.Server)
 	if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err.Error())
